@@ -9,7 +9,7 @@ technologies: [Android]
 categories:   [Media]
 languages:    [Java]
 solutions:    [Mobile]
-github:       android-BasicMediaDecoder
+github:       android/media
 level:        ADVANCED
 icon:         screenshots/icon-web.png
 apiRefs:
