@@ -5,10 +5,10 @@
 ---
 status:       PUBLISHED
 technologies: [Android]
-categories:   [Media, Android Oreo]
+categories:   [Media]
 languages:    [Kotlin]
 solutions:    [Mobile]
-github:       android-PictureInPicture
+github:       android/media
 level:        ADVANCED
 icon:         screenshots/icon-web.png
 apiRefs:
