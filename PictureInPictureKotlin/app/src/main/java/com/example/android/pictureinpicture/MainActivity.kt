@@ -27,8 +27,8 @@ import android.content.res.Configuration
 import android.graphics.drawable.Icon
 import android.net.Uri
 import android.os.Bundle
-import android.support.annotation.DrawableRes
-import android.support.v7.app.AppCompatActivity
+import androidx.annotation.DrawableRes
+import androidx.appcompat.app.AppCompatActivity
 import android.util.Rational
 import android.view.View
 import android.widget.Button
@@ -45,25 +45,25 @@ class MainActivity : AppCompatActivity() {
     companion object {
 
         /** Intent action for media controls from Picture-in-Picture mode.  */
-        private val ACTION_MEDIA_CONTROL = "media_control"
+        private const val ACTION_MEDIA_CONTROL = "media_control"
 
         /** Intent extra for media controls from Picture-in-Picture mode.  */
-        private val EXTRA_CONTROL_TYPE = "control_type"
+        private const val EXTRA_CONTROL_TYPE = "control_type"
 
         /** The request code for play action PendingIntent.  */
-        private val REQUEST_PLAY = 1
+        private const val REQUEST_PLAY = 1
 
         /** The request code for pause action PendingIntent.  */
-        private val REQUEST_PAUSE = 2
+        private const val REQUEST_PAUSE = 2
 
         /** The request code for info action PendingIntent.  */
-        private val REQUEST_INFO = 3
+        private const val REQUEST_INFO = 3
 
         /** The intent extra value for play action.  */
-        private val CONTROL_TYPE_PLAY = 1
+        private const val CONTROL_TYPE_PLAY = 1
 
         /** The intent extra value for pause action.  */
-        private val CONTROL_TYPE_PAUSE = 2
+        private const val CONTROL_TYPE_PAUSE = 2
 
     }
 
@@ -79,14 +79,13 @@ class MainActivity : AppCompatActivity() {
     /** A [BroadcastReceiver] to receive action item events from Picture-in-Picture mode.  */
     private val mReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent?) {
-            intent?.let { intent ->
+            if (intent != null) {
                 if (intent.action != ACTION_MEDIA_CONTROL) {
                     return
                 }
 
                 // This is where we are called back from Picture-in-Picture action items.
-                val controlType = intent.getIntExtra(EXTRA_CONTROL_TYPE, 0)
-                when (controlType) {
+                when (intent.getIntExtra(EXTRA_CONTROL_TYPE, 0)) {
                     CONTROL_TYPE_PLAY -> mMovieView.play()
                     CONTROL_TYPE_PAUSE -> mMovieView.pause()
                 }
@@ -169,8 +168,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         // View references
-        mMovieView = findViewById<MovieView>(R.id.movie)
-        mScrollView = findViewById<ScrollView>(R.id.scroll)
+        mMovieView = findViewById(R.id.movie)
+        mScrollView = findViewById(R.id.scroll)
 
         val switchExampleButton = findViewById<Button>(R.id.switch_example)
         switchExampleButton.text = getString(R.string.switch_media_session)

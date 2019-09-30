@@ -21,7 +21,7 @@ import android.graphics.Color
 import android.media.MediaPlayer
 import android.os.Handler
 import android.os.Message
-import android.support.annotation.RawRes
+import androidx.annotation.RawRes
 import android.transition.TransitionManager
 import android.util.AttributeSet
 import android.util.Log
@@ -49,13 +49,13 @@ class MovieView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
 
     companion object {
 
-        private val TAG = "MovieView"
+        private const val TAG = "MovieView"
 
         /** The amount of time we are stepping forward or backward for fast-forward and fast-rewind.  */
-        private val FAST_FORWARD_REWIND_INTERVAL = 5000 // ms
+        private const val FAST_FORWARD_REWIND_INTERVAL = 5000 // ms
 
         /** The amount of time until we fade out the controls.  */
-        private val TIMEOUT_CONTROLS = 3000L // ms
+        private const val TIMEOUT_CONTROLS = 3000L // ms
 
     }
 
@@ -106,7 +106,7 @@ class MovieView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     private var mTimeoutHandler: TimeoutHandler? = null
 
     /** The listener for all the events we publish.  */
-    internal var mMovieListener: MovieListener? = null
+    private var mMovieListener: MovieListener? = null
 
     private var mSavedCurrentPosition: Int = 0
 
@@ -115,23 +115,23 @@ class MovieView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
 
         // Inflate the content
         View.inflate(context, R.layout.view_movie, this)
-        mSurfaceView = findViewById<SurfaceView>(R.id.surface)
+        mSurfaceView = findViewById(R.id.surface)
         mShade = findViewById<View>(R.id.shade)
-        mToggle = findViewById<ImageButton>(R.id.toggle)
-        mFastForward = findViewById<ImageButton>(R.id.fast_forward)
-        mFastRewind = findViewById<ImageButton>(R.id.fast_rewind)
-        mMinimize = findViewById<ImageButton>(R.id.minimize)
+        mToggle = findViewById(R.id.toggle)
+        mFastForward = findViewById(R.id.fast_forward)
+        mFastRewind = findViewById(R.id.fast_rewind)
+        mMinimize = findViewById(R.id.minimize)
 
         // Attributes
         val a = context.obtainStyledAttributes(attrs, R.styleable.MovieView,
                 defStyleAttr, R.style.Widget_PictureInPicture_MovieView)
         setVideoResourceId(a.getResourceId(R.styleable.MovieView_android_src, 0))
         setAdjustViewBounds(a.getBoolean(R.styleable.MovieView_android_adjustViewBounds, false))
-        title = a.getString(R.styleable.MovieView_android_title)
+        title = a.getString(R.styleable.MovieView_android_title) ?: ""
         a.recycle()
 
         // Bind view events
-        val listener = View.OnClickListener { view ->
+        val listener = OnClickListener { view ->
             when (view.id) {
                 R.id.surface -> toggleControls()
                 R.id.toggle -> toggle()
@@ -183,24 +183,24 @@ class MovieView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
             val videoHeight = player.videoHeight
             if (videoWidth != 0 && videoHeight != 0) {
                 val aspectRatio = videoHeight.toFloat() / videoWidth
-                val width = View.MeasureSpec.getSize(widthMeasureSpec)
-                val widthMode = View.MeasureSpec.getMode(widthMeasureSpec)
-                val height = View.MeasureSpec.getSize(heightMeasureSpec)
-                val heightMode = View.MeasureSpec.getMode(heightMeasureSpec)
+                val width = MeasureSpec.getSize(widthMeasureSpec)
+                val widthMode = MeasureSpec.getMode(widthMeasureSpec)
+                val height = MeasureSpec.getSize(heightMeasureSpec)
+                val heightMode = MeasureSpec.getMode(heightMeasureSpec)
                 if (mAdjustViewBounds) {
-                    if (widthMode == View.MeasureSpec.EXACTLY
-                            && heightMode != View.MeasureSpec.EXACTLY) {
+                    if (widthMode == MeasureSpec.EXACTLY
+                            && heightMode != MeasureSpec.EXACTLY) {
                         super.onMeasure(widthMeasureSpec,
-                                View.MeasureSpec.makeMeasureSpec((width * aspectRatio).toInt(),
-                                        View.MeasureSpec.EXACTLY))
-                    } else if (widthMode != View.MeasureSpec.EXACTLY
-                            && heightMode == View.MeasureSpec.EXACTLY) {
-                        super.onMeasure(View.MeasureSpec.makeMeasureSpec((height / aspectRatio).toInt(),
-                                View.MeasureSpec.EXACTLY), heightMeasureSpec)
+                                MeasureSpec.makeMeasureSpec((width * aspectRatio).toInt(),
+                                        MeasureSpec.EXACTLY))
+                    } else if (widthMode != MeasureSpec.EXACTLY
+                            && heightMode == MeasureSpec.EXACTLY) {
+                        super.onMeasure(MeasureSpec.makeMeasureSpec((height / aspectRatio).toInt(),
+                                MeasureSpec.EXACTLY), heightMeasureSpec)
                     } else {
                         super.onMeasure(widthMeasureSpec,
-                                View.MeasureSpec.makeMeasureSpec((width * aspectRatio).toInt(),
-                                        View.MeasureSpec.EXACTLY))
+                                MeasureSpec.makeMeasureSpec((width * aspectRatio).toInt(),
+                                        MeasureSpec.EXACTLY))
                     }
                 } else {
                     val viewRatio = height.toFloat() / width
@@ -246,7 +246,7 @@ class MovieView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
 
      * @param id The raw resource ID.
      */
-    fun setVideoResourceId(@RawRes id: Int) {
+    private fun setVideoResourceId(@RawRes id: Int) {
         if (id == mVideoResourceId) {
             return
         }
@@ -298,14 +298,14 @@ class MovieView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     /**
      * Fast-forward the video.
      */
-    fun fastForward() {
+    private fun fastForward() {
         mMediaPlayer?.let { it.seekTo(it.currentPosition + FAST_FORWARD_REWIND_INTERVAL) }
     }
 
     /**
      * Fast-rewind the video.
      */
-    fun fastRewind() {
+    private fun fastRewind() {
         mMediaPlayer?.let { it.seekTo(it.currentPosition - FAST_FORWARD_REWIND_INTERVAL) }
     }
 
@@ -355,7 +355,7 @@ class MovieView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     /**
      * Restarts playback of the video.
      */
-    public fun startVideo() {
+    fun startVideo() {
         mMediaPlayer?.let { player ->
             player.reset()
             try {
@@ -390,11 +390,11 @@ class MovieView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         mMediaPlayer = null
     }
 
-    internal fun toggle() {
+    private fun toggle() {
         mMediaPlayer?.let { if (it.isPlaying) pause() else play() }
     }
 
-    internal fun toggleControls() {
+    private fun toggleControls() {
         if (mShade.visibility == View.VISIBLE) {
             hideControls()
         } else {
@@ -402,7 +402,7 @@ class MovieView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         }
     }
 
-    internal fun adjustToggleState() {
+    private fun adjustToggleState() {
         mMediaPlayer?.let {
             if (it.isPlaying) {
                 mToggle.contentDescription = resources.getString(R.string.pause)
@@ -428,7 +428,7 @@ class MovieView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         }
 
         companion object {
-            internal val MESSAGE_HIDE_CONTROLS = 1
+            const val MESSAGE_HIDE_CONTROLS = 1
         }
 
     }
