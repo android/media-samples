@@ -29,18 +29,19 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.view.MenuItemCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.app.MediaRouteActionProvider;
-import android.support.v7.app.MediaRouteDiscoveryFragment;
-import android.support.v7.media.MediaControlIntent;
-import android.support.v7.media.MediaItemStatus;
-import android.support.v7.media.MediaRouteSelector;
-import android.support.v7.media.MediaRouter;
-import android.support.v7.media.MediaRouter.Callback;
-import android.support.v7.media.MediaRouter.ProviderInfo;
-import android.support.v7.media.MediaRouter.RouteInfo;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentManager;
+import androidx.core.view.MenuItemCompat;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.mediarouter.app.MediaRouteActionProvider;
+import androidx.mediarouter.app.MediaRouteDiscoveryFragment;
+import androidx.mediarouter.media.MediaControlIntent;
+import androidx.mediarouter.media.MediaItemStatus;
+import androidx.mediarouter.media.MediaRouteSelector;
+import androidx.mediarouter.media.MediaRouter;
+import androidx.mediarouter.media.MediaRouter.Callback;
+import androidx.mediarouter.media.MediaRouter.ProviderInfo;
+import androidx.mediarouter.media.MediaRouter.RouteInfo;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -68,7 +69,6 @@ import java.io.File;
 
 /**
  * <h3>Media Router Support Activity</h3>
- * <p/>
  * <p>
  * This demonstrates how to use the {@link MediaRouter} API to build an
  * application that allows the user to send content to various rendering
@@ -91,7 +91,6 @@ public class MainActivity extends AppCompatActivity {
     private SeekBar mSeekBar;
     private boolean mPaused;
     private boolean mNeedResume;
-    private boolean mSeeking;
 
     private RemoteControlClient mRemoteControlClient;
     private ComponentName mEventReceiver;
@@ -347,12 +346,10 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                mSeeking = true;
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                mSeeking = false;
                 updateUi();
             }
         });
@@ -629,91 +626,101 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private static final class MediaItem {
-        public final String mName;
-        public final Uri mUri;
-        public final String mMime;
 
-        public MediaItem(String name, Uri uri, String mime) {
+        final String mName;
+        final Uri mUri;
+        final String mMime;
+
+        MediaItem(String name, Uri uri, String mime) {
             mName = name;
             mUri = uri;
             mMime = mime;
         }
 
         @Override
+        @NonNull
         public String toString() {
             return mName;
         }
     }
 
     private final class LibraryAdapter extends ArrayAdapter<MediaItem> {
-        public LibraryAdapter() {
+        LibraryAdapter() {
             super(MainActivity.this, R.layout.media_item);
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        @NonNull
+        public View getView(int position, View convertView, @NonNull ViewGroup parent) {
             final View v;
             if (convertView == null) {
-                v = getLayoutInflater().inflate(R.layout.media_item, null);
+                v = getLayoutInflater().inflate(R.layout.media_item, parent, false);
             } else {
                 v = convertView;
             }
 
             final MediaItem item = getItem(position);
-
-            TextView tv = (TextView) v.findViewById(R.id.item_text);
-            tv.setText(item.mName);
-
-            ImageButton b = (ImageButton) v.findViewById(R.id.item_action);
-            b.setImageResource(R.drawable.ic_suggestions_add);
-            b.setTag(item);
-            b.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (item != null) {
+            TextView tv = v.findViewById(R.id.item_text);
+            ImageButton b = v.findViewById(R.id.item_action);
+            if (item == null) {
+                tv.setText(null);
+                b.setImageResource(0);
+                b.setTag(null);
+                b.setOnClickListener(null);
+            } else {
+                tv.setText(item.mName);
+                b.setImageResource(R.drawable.ic_suggestions_add);
+                b.setTag(item);
+                b.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
                         mSessionManager.add(item.mUri, item.mMime);
                         Toast.makeText(MainActivity.this, R.string.playlist_item_added_text,
                                 Toast.LENGTH_SHORT).show();
                     }
-                }
-            });
-
+                });
+            }
             return v;
         }
     }
 
     private final class PlaylistAdapter extends ArrayAdapter<PlaylistItem> {
-        public PlaylistAdapter() {
+
+        PlaylistAdapter() {
             super(MainActivity.this, R.layout.media_item);
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        @NonNull
+        public View getView(int position, View convertView, @NonNull ViewGroup parent) {
             final View v;
             if (convertView == null) {
-                v = getLayoutInflater().inflate(R.layout.media_item, null);
+                v = getLayoutInflater().inflate(R.layout.media_item, parent, false);
             } else {
                 v = convertView;
             }
 
             final PlaylistItem item = getItem(position);
-
-            TextView tv = (TextView) v.findViewById(R.id.item_text);
-            tv.setText(item.toString());
-
-            ImageButton b = (ImageButton) v.findViewById(R.id.item_action);
-            b.setImageResource(R.drawable.ic_suggestions_delete);
-            b.setTag(item);
-            b.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (item != null) {
+            TextView tv = v.findViewById(R.id.item_text);
+            ImageButton b = v.findViewById(R.id.item_action);
+            if (item == null) {
+                tv.setText(null);
+                b.setImageResource(0);
+                b.setTag(null);
+                b.setOnClickListener(null);
+            } else {
+                tv.setText(item.toString());
+                b.setImageResource(R.drawable.ic_suggestions_delete);
+                b.setTag(item);
+                b.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
                         mSessionManager.remove(item.getItemId());
                         Toast.makeText(MainActivity.this, R.string.playlist_item_removed_text,
                                 Toast.LENGTH_SHORT).show();
                     }
-                }
-            });
+                });
+            }
 
             return v;
         }
