@@ -17,8 +17,8 @@
 package com.example.android.mediarouter.player;
 
 import android.content.Context;
-import android.support.v7.media.MediaControlIntent;
-import android.support.v7.media.MediaRouter.RouteInfo;
+import androidx.mediarouter.media.MediaControlIntent;
+import androidx.mediarouter.media.MediaRouter.RouteInfo;
 
 /**
  * Abstraction of common playback operations of media items, such as play,

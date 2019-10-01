@@ -19,18 +19,16 @@ package com.example.android.mediarouter.player;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.media.MediaItemStatus;
-import android.support.v7.media.MediaRouter.ControlRequestCallback;
-import android.support.v7.media.MediaRouter.RouteInfo;
-import android.support.v7.media.MediaSessionStatus;
-import android.support.v7.media.RemotePlaybackClient;
-import android.support.v7.media.RemotePlaybackClient.ItemActionCallback;
-import android.support.v7.media.RemotePlaybackClient.SessionActionCallback;
-import android.support.v7.media.RemotePlaybackClient.StatusCallback;
+import androidx.mediarouter.media.MediaItemStatus;
+import androidx.mediarouter.media.MediaRouter.ControlRequestCallback;
+import androidx.mediarouter.media.MediaRouter.RouteInfo;
+import androidx.mediarouter.media.MediaSessionStatus;
+import androidx.mediarouter.media.RemotePlaybackClient;
+import androidx.mediarouter.media.RemotePlaybackClient.ItemActionCallback;
+import androidx.mediarouter.media.RemotePlaybackClient.SessionActionCallback;
+import androidx.mediarouter.media.RemotePlaybackClient.StatusCallback;
 import android.util.Log;
 
-import com.example.android.mediarouter.player.Player;
-import com.example.android.mediarouter.player.PlaylistItem;
 import com.example.android.mediarouter.provider.SampleMediaRouteProvider;
 
 import java.util.ArrayList;
