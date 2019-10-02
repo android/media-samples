@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   Copyright 2013 The Android Open Source Project
 
@@ -12,14 +13,7 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-  -->
-
+-->
 <resources>
-
-    <style name="Widget.SampleMessage">
-        <item name="android:textAppearance">?android:textAppearanceLarge</item>
-        <item name="android:lineSpacingMultiplier">1.2</item>
-        <item name="android:shadowDy">-6.5</item>
-    </style>
-
+    <style name="AppTheme" parent="Theme.AppCompat.Light" />
 </resources>
