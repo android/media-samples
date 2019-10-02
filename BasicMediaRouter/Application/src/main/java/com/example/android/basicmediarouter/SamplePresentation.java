@@ -48,16 +48,16 @@ public class SamplePresentation extends Presentation {
         super.onCreate(savedInstanceState);
 
         // Set the content view to the custom layout
-        setContentView(R.layout.display);
+        setContentView(R.layout.sample_presentation);
 
         // Get the Views
-        mLayout = (LinearLayout) findViewById(R.id.display_layout);
-        mText = (TextView) findViewById(R.id.display_text);
+        mLayout = findViewById(R.id.display_layout);
+        mText = findViewById(R.id.display_text);
 
         /*
          * Show the name of the display this presentation was embedded in.
          */
-        TextView smallText = (TextView) findViewById(R.id.display_smalltext);
+        TextView smallText = findViewById(R.id.display_smalltext);
         final String name = getDisplay().getName();
         smallText.setText(getResources().getString(R.string.display_name, name));
     }
