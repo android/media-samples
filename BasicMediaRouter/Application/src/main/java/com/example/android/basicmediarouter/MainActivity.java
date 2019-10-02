@@ -16,13 +16,14 @@
 
 package com.example.android.basicmediarouter;
 
-import android.app.Activity;
-import android.app.MediaRouteActionProvider;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.media.MediaRouter;
-import android.media.MediaRouter.RouteInfo;
 import android.os.Bundle;
+import androidx.core.view.MenuItemCompat;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.mediarouter.app.MediaRouteActionProvider;
+import androidx.mediarouter.media.MediaControlIntent;
+import androidx.mediarouter.media.MediaRouteSelector;
+import androidx.mediarouter.media.MediaRouter;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -54,7 +55,7 @@ import android.widget.TextView;
  * @see android.app.Presentation
  * @see android.media.MediaRouter
  */
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
 
     private MediaRouter mMediaRouter;
 
@@ -65,14 +66,14 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.sample_main);
-        mTextStatus = (TextView) findViewById(R.id.textStatus);
+        setContentView(R.layout.main_activity);
+        mTextStatus = findViewById(R.id.textStatus);
 
         // get the list of background colors
         mColors = getResources().getIntArray(R.array.androidcolors);
 
         // Enable clicks on the 'change color' button
-        mButton = (Button) findViewById(R.id.button1);
+        mButton = findViewById(R.id.button1);
         mButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -83,7 +84,7 @@ public class MainActivity extends Activity {
 
         // BEGIN_INCLUDE(getMediaRouter)
         // Get the MediaRouter service
-        mMediaRouter = (MediaRouter) getSystemService(Context.MEDIA_ROUTER_SERVICE);
+        mMediaRouter = MediaRouter.getInstance(this);
         // END_INCLUDE(getMediaRouter)
     }
 
@@ -103,16 +104,17 @@ public class MainActivity extends Activity {
      * {@link android.media.MediaRouter} for {@link android.media.MediaRouter#ROUTE_TYPE_LIVE_VIDEO}
      * streams. @
      */
-    private final MediaRouter.SimpleCallback mMediaRouterCallback =
-            new MediaRouter.SimpleCallback() {
+    private final MediaRouter.Callback mMediaRouterCallback =
+            new MediaRouter.Callback() {
 
                 // BEGIN_INCLUDE(SimpleCallback)
+
                 /**
                  * A new route has been selected as active. Disable the current
                  * route and enable the new one.
                  */
                 @Override
-                public void onRouteSelected(MediaRouter router, int type, RouteInfo info) {
+                public void onRouteSelected(MediaRouter router, MediaRouter.RouteInfo route) {
                     updatePresentation();
                 }
 
@@ -120,9 +122,8 @@ public class MainActivity extends Activity {
                  * The route has been unselected.
                  */
                 @Override
-                public void onRouteUnselected(MediaRouter router, int type, RouteInfo info) {
+                public void onRouteUnselected(MediaRouter router, MediaRouter.RouteInfo info) {
                     updatePresentation();
-
                 }
 
                 /**
@@ -131,7 +132,7 @@ public class MainActivity extends Activity {
                  * or its properties have changed.
                  */
                 @Override
-                public void onRoutePresentationDisplayChanged(MediaRouter router, RouteInfo info) {
+                public void onRoutePresentationDisplayChanged(MediaRouter router, MediaRouter.RouteInfo route) {
                     updatePresentation();
                 }
                 // END_INCLUDE(SimpleCallback)
@@ -149,14 +150,10 @@ public class MainActivity extends Activity {
 
         // BEGIN_INCLUDE(updatePresentationInit)
         // Get the selected route for live video
-        RouteInfo selectedRoute = mMediaRouter.getSelectedRoute(
-                MediaRouter.ROUTE_TYPE_LIVE_VIDEO);
+        MediaRouter.RouteInfo selectedRoute = mMediaRouter.getSelectedRoute();
 
         // Get its Display if a valid route has been selected
-        Display selectedDisplay = null;
-        if (selectedRoute != null) {
-            selectedDisplay = selectedRoute.getPresentationDisplay();
-        }
+        Display selectedDisplay = selectedRoute.getPresentationDisplay();
         // END_INCLUDE(updatePresentationInit)
 
         // BEGIN_INCLUDE(updatePresentationDismiss)
@@ -188,7 +185,7 @@ public class MainActivity extends Activity {
             try {
                 mPresentation.show();
                 mTextStatus.setText(getResources().getString(R.string.secondary_connected,
-                        selectedRoute.getName(MainActivity.this)));
+                        selectedRoute.getName()));
                 mButton.setEnabled(true);
                 showNextColor();
             } catch (WindowManager.InvalidDisplayException ex) {
@@ -206,7 +203,12 @@ public class MainActivity extends Activity {
 
         // BEGIN_INCLUDE(addCallback)
         // Register a callback for all events related to live video devices
-        mMediaRouter.addCallback(MediaRouter.ROUTE_TYPE_LIVE_VIDEO, mMediaRouterCallback);
+        mMediaRouter.addCallback(
+                new MediaRouteSelector.Builder()
+                        .addControlCategory(MediaControlIntent.CATEGORY_LIVE_VIDEO)
+                        .build(),
+                mMediaRouterCallback
+        );
         // END_INCLUDE(addCallback)
 
         // Show the 'Not connected' status message
@@ -254,9 +256,13 @@ public class MainActivity extends Activity {
         // BEGIN_INCLUDE(MediaRouteActionProvider)
         // Configure the media router action provider
         MenuItem mediaRouteMenuItem = menu.findItem(R.id.menu_media_route);
+
         MediaRouteActionProvider mediaRouteActionProvider =
-                (MediaRouteActionProvider) mediaRouteMenuItem.getActionProvider();
-        mediaRouteActionProvider.setRouteTypes(MediaRouter.ROUTE_TYPE_LIVE_VIDEO);
+                (MediaRouteActionProvider) MenuItemCompat.getActionProvider(mediaRouteMenuItem);
+        mediaRouteActionProvider.setRouteSelector(
+                new MediaRouteSelector.Builder()
+                        .addControlCategory(MediaControlIntent.CATEGORY_LIVE_VIDEO)
+                        .build());
         // BEGIN_INCLUDE(MediaRouteActionProvider)
 
         return true;
@@ -296,5 +302,4 @@ public class MainActivity extends Activity {
             mColor = (mColor + 1) % mColors.length;
         }
     }
-
 }
