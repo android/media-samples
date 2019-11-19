@@ -33,8 +33,8 @@ available for PiP mode. The aspect ratio is used when the activity is in PiP mod
 are used as menu items in PiP mode. You can use a [PendingIntent][9] to specify what to do when the
 item is selected.
 
-[1]: https://developer.android.com/guide/topics/ui/multi-window.html
-[2]: https://developer.android.com/guide/topics/ui/picture-in-picture.html
+[1]: https://developer.android.com/guide/topics/ui/picture-in-picture.html
+[2]: https://developer.android.com/guide/topics/ui/multi-window.html
 [3]: https://developer.android.com/reference/android/app/Activity.html#onPause()
 [4]: https://developer.android.com/reference/android/app/Activity.html#onStop()
 [5]: https://developer.android.com/guide/topics/ui/multi-window.html#lifecycle
