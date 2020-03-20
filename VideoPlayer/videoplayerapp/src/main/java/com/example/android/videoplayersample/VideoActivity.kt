@@ -82,7 +82,7 @@ class VideoActivity : AppCompatActivity(), AnkoLogger {
                 // [ACTION_SKIP_PREVIOUS], [ACTION_SKIP_NEXT], [ACTION_SKIP_TO_QUEUE_ITEM]
                 setQueueNavigator(object : TimelineQueueNavigator(mediaSession) {
                     override fun getMediaDescription(windowIndex: Int): MediaDescriptionCompat {
-                        return MediaCatalog[windowIndex]
+                        return mediaCatalog[windowIndex]
                     }
                 })
             }
