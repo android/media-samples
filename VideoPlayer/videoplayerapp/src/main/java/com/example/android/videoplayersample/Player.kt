@@ -65,7 +65,7 @@ class PlayerHolder(private val context: Context,
 
     private fun buildMediaSource(): MediaSource {
         val uriList = mutableListOf<MediaSource>()
-        MediaCatalog.forEach {
+        mediaCatalog.forEach {
             uriList.add(createExtractorMediaSource(it.mediaUri!!))
         }
         return ConcatenatingMediaSource(*uriList.toTypedArray())
