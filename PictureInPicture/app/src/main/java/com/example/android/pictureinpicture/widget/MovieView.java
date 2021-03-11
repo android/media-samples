@@ -22,9 +22,8 @@ import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
-import androidx.annotation.Nullable;
-import androidx.annotation.RawRes;
 import android.transition.TransitionManager;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -34,6 +33,9 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+
+import androidx.annotation.Nullable;
+import androidx.annotation.RawRes;
 
 import com.example.android.pictureinpicture.R;
 
@@ -48,28 +50,45 @@ import java.lang.ref.WeakReference;
  */
 public class MovieView extends RelativeLayout {
 
-    /** Monitors all events related to {@link MovieView}. */
+    /**
+     * Monitors all events related to {@link MovieView}.
+     */
     public abstract static class MovieListener {
 
-        /** Called when the video is started or resumed. */
-        public void onMovieStarted() {}
+        /**
+         * Called when the video is started or resumed.
+         */
+        public void onMovieStarted() {
+        }
 
-        /** Called when the video is paused or finished. */
-        public void onMovieStopped() {}
+        /**
+         * Called when the video is paused or finished.
+         */
+        public void onMovieStopped() {
+        }
 
-        /** Called when this view should be minimized. */
-        public void onMovieMinimized() {}
+        /**
+         * Called when this view should be minimized.
+         */
+        public void onMovieMinimized() {
+        }
     }
 
     private static final String TAG = "MovieView";
 
-    /** The amount of time we are stepping forward or backward for fast-forward and fast-rewind. */
+    /**
+     * The amount of time we are stepping forward or backward for fast-forward and fast-rewind.
+     */
     private static final int FAST_FORWARD_REWIND_INTERVAL = 5000; // ms
 
-    /** The amount of time until we fade out the controls. */
+    /**
+     * The amount of time until we fade out the controls.
+     */
     private static final int TIMEOUT_CONTROLS = 3000; // ms
 
-    /** Shows the video playback. */
+    /**
+     * Shows the video playback.
+     */
     private final SurfaceView mSurfaceView;
 
     // Controls
@@ -79,22 +98,35 @@ public class MovieView extends RelativeLayout {
     private final ImageButton mFastRewind;
     private final ImageButton mMinimize;
 
-    /** This plays the video. This will be null when no video is set. */
+    /**
+     * This plays the video. This will be null when no video is set.
+     */
     MediaPlayer mMediaPlayer;
 
-    /** The resource ID for the video to play. */
-    @RawRes private int mVideoResourceId;
+    /**
+     * The resource ID for the video to play.
+     */
+    @RawRes
+    private int mVideoResourceId;
 
-    /** The title of the video */
+    /**
+     * The title of the video
+     */
     private String mTitle;
 
-    /** Whether we adjust our view bounds or we fill the remaining area with black bars */
+    /**
+     * Whether we adjust our view bounds or we fill the remaining area with black bars
+     */
     private boolean mAdjustViewBounds;
 
-    /** Handles timeout for media controls. */
+    /**
+     * Handles timeout for media controls.
+     */
     TimeoutHandler mTimeoutHandler;
 
-    /** The listener for all the events we publish. */
+    /**
+     * The listener for all the events we publish.
+     */
     MovieListener mMovieListener;
 
     private int mSavedCurrentPosition;
@@ -133,42 +165,36 @@ public class MovieView extends RelativeLayout {
         attributes.recycle();
 
         // Bind view events
-        final OnClickListener listener =
-                new OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        switch (view.getId()) {
-                            case R.id.surface:
-                                toggleControls();
-                                break;
-                            case R.id.toggle:
-                                toggle();
-                                break;
-                            case R.id.fast_forward:
-                                fastForward();
-                                break;
-                            case R.id.fast_rewind:
-                                fastRewind();
-                                break;
-                            case R.id.minimize:
-                                if (mMovieListener != null) {
-                                    mMovieListener.onMovieMinimized();
-                                }
-                                break;
-                        }
-                        // Start or reset the timeout to hide controls
-                        if (mMediaPlayer != null) {
-                            if (mTimeoutHandler == null) {
-                                mTimeoutHandler = new TimeoutHandler(MovieView.this);
-                            }
-                            mTimeoutHandler.removeMessages(TimeoutHandler.MESSAGE_HIDE_CONTROLS);
-                            if (mMediaPlayer.isPlaying()) {
-                                mTimeoutHandler.sendEmptyMessageDelayed(
-                                        TimeoutHandler.MESSAGE_HIDE_CONTROLS, TIMEOUT_CONTROLS);
-                            }
-                        }
+        final OnClickListener listener = new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int id = view.getId();
+                if (id == R.id.surface) {
+                    toggleControls();
+                } else if (id == R.id.toggle) {
+                    toggle();
+                } else if (id == R.id.fast_forward) {
+                    fastForward();
+                } else if (id == R.id.fast_rewind) {
+                    fastRewind();
+                } else if (id == R.id.minimize) {
+                    if (mMovieListener != null) {
+                        mMovieListener.onMovieMinimized();
                     }
-                };
+                }
+                // Start or reset the timeout to hide controls
+                if (mMediaPlayer != null) {
+                    if (mTimeoutHandler == null) {
+                        mTimeoutHandler = new TimeoutHandler(MovieView.this);
+                    }
+                    mTimeoutHandler.removeMessages(TimeoutHandler.MESSAGE_HIDE_CONTROLS);
+                    if (mMediaPlayer.isPlaying()) {
+                        mTimeoutHandler.sendEmptyMessageDelayed(
+                                TimeoutHandler.MESSAGE_HIDE_CONTROLS, TIMEOUT_CONTROLS);
+                    }
+                }
+            }
+        };
         mSurfaceView.setOnClickListener(listener);
         mToggle.setOnClickListener(listener);
         mFastForward.setOnClickListener(listener);
@@ -322,7 +348,9 @@ public class MovieView extends RelativeLayout {
         requestLayout();
     }
 
-    /** Shows all the controls. */
+    /**
+     * Shows all the controls.
+     */
     public void showControls() {
         TransitionManager.beginDelayedTransition(this);
         mShade.setVisibility(View.VISIBLE);
@@ -332,7 +360,9 @@ public class MovieView extends RelativeLayout {
         mMinimize.setVisibility(View.VISIBLE);
     }
 
-    /** Hides all the controls. */
+    /**
+     * Hides all the controls.
+     */
     public void hideControls() {
         TransitionManager.beginDelayedTransition(this);
         mShade.setVisibility(View.INVISIBLE);
@@ -342,7 +372,9 @@ public class MovieView extends RelativeLayout {
         mMinimize.setVisibility(View.INVISIBLE);
     }
 
-    /** Fast-forward the video. */
+    /**
+     * Fast-forward the video.
+     */
     public void fastForward() {
         if (mMediaPlayer == null) {
             return;
@@ -350,7 +382,9 @@ public class MovieView extends RelativeLayout {
         mMediaPlayer.seekTo(mMediaPlayer.getCurrentPosition() + FAST_FORWARD_REWIND_INTERVAL);
     }
 
-    /** Fast-rewind the video. */
+    /**
+     * Fast-rewind the video.
+     */
     public void fastRewind() {
         if (mMediaPlayer == null) {
             return;
@@ -409,7 +443,9 @@ public class MovieView extends RelativeLayout {
         startVideo();
     }
 
-    /** Restarts playback of the video. */
+    /**
+     * Restarts playback of the video.
+     */
     public void startVideo() {
         mMediaPlayer.reset();
         try (AssetFileDescriptor fd = getResources().openRawResourceFd(mVideoResourceId)) {
@@ -489,20 +525,19 @@ public class MovieView extends RelativeLayout {
         private final WeakReference<MovieView> mMovieViewRef;
 
         TimeoutHandler(MovieView view) {
+            super(Looper.getMainLooper());
             mMovieViewRef = new WeakReference<>(view);
         }
 
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MESSAGE_HIDE_CONTROLS:
-                    MovieView movieView = mMovieViewRef.get();
-                    if (movieView != null) {
-                        movieView.hideControls();
-                    }
-                    break;
-                default:
-                    super.handleMessage(msg);
+            if (msg.what == MESSAGE_HIDE_CONTROLS) {
+                MovieView movieView = mMovieViewRef.get();
+                if (movieView != null) {
+                    movieView.hideControls();
+                }
+            } else {
+                super.handleMessage(msg);
             }
         }
     }
