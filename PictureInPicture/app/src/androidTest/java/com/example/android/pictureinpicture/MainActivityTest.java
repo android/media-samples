@@ -16,26 +16,18 @@
 
 package com.example.android.pictureinpicture;
 
-import static androidx.test.espresso.Espresso.onView;
-import static androidx.test.espresso.action.ViewActions.click;
-import static androidx.test.espresso.assertion.ViewAssertions.matches;
-import static androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom;
-import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static androidx.test.espresso.matcher.ViewMatchers.withId;
-
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.core.AllOf.allOf;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
 import android.content.pm.ActivityInfo;
-import androidx.test.platform.app.InstrumentationRegistry;
+import android.view.View;
+
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.test.espresso.UiController;
 import androidx.test.espresso.ViewAction;
-import androidx.test.rule.ActivityTestRule;
+import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-import android.view.View;
+import androidx.test.filters.LargeTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.example.android.pictureinpicture.widget.MovieView;
 
@@ -46,15 +38,28 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.assertion.ViewAssertions.matches;
+import static androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom;
+import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.withId;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.core.AllOf.allOf;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
+@LargeTest
 public class MainActivityTest {
 
     @Rule
-    public ActivityTestRule<MainActivity> rule = new ActivityTestRule<>(MainActivity.class);
+    public ActivityScenarioRule<MainActivity> rule = new ActivityScenarioRule<>(MainActivity.class);
 
     @Test
-    public void movie_playingOnPip() throws Throwable {
+    public void movie_playingOnPip() {
         // The movie should be playing on start
         onView(withId(R.id.movie))
                 .check(matches(allOf(isDisplayed(), isPlaying())))
@@ -63,21 +68,18 @@ public class MainActivityTest {
         onView(withId(R.id.minimize)).perform(click());
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
         // The Activity is paused. We cannot use Espresso to test paused activities.
-        rule.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                // We are now in Picture-in-Picture mode
-                assertTrue(rule.getActivity().isInPictureInPictureMode());
-                final MovieView view = rule.getActivity().findViewById(R.id.movie);
-                assertNotNull(view);
-                // The video should still be playing
-                assertTrue(view.isPlaying());
-            }
+        rule.getScenario().onActivity(activity -> {
+            // We are now in Picture-in-Picture mode
+            assertTrue(activity.isInPictureInPictureMode());
+            final MovieView view = activity.findViewById(R.id.movie);
+            assertNotNull(view);
+            // The video should still be playing
+            assertTrue(view.isPlaying());
         });
     }
 
     @Test
-    public void movie_pauseAndResume() throws Throwable {
+    public void movie_pauseAndResume() {
         // The movie should be playing on start
         onView(withId(R.id.movie))
                 .check(matches(allOf(isDisplayed(), isPlaying())))
@@ -91,42 +93,36 @@ public class MainActivityTest {
     }
 
     @Test
-    public void fullscreen_enabledOnLandscape() throws Throwable {
-        rule.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                rule.getActivity()
-                        .setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-            }
-        });
+    public void fullscreen_enabledOnLandscape() {
+        rule.getScenario().onActivity(activity ->
+                activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+        );
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
-        rule.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                final View decorView = rule.getActivity().getWindow().getDecorView();
-                assertThat(decorView.getSystemUiVisibility(),
-                        hasFlag(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN));
-            }
+        rule.getScenario().onActivity(activity -> {
+            final WindowInsetsCompat insets = ViewCompat.getRootWindowInsets(
+                    activity.getWindow().getDecorView()
+            );
+            final Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            assertThat(systemBars.left, is(0));
+            assertThat(systemBars.top, is(0));
+            assertThat(systemBars.right, is(0));
+            assertThat(systemBars.bottom, is(0));
         });
     }
 
     @Test
-    public void fullscreen_disabledOnPortrait() throws Throwable {
-        rule.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                rule.getActivity()
-                        .setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-            }
-        });
+    public void fullscreen_disabledOnPortrait() {
+        rule.getScenario().onActivity(activity ->
+                activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+        );
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
-        rule.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                final View decorView = rule.getActivity().getWindow().getDecorView();
-                assertThat(decorView.getSystemUiVisibility(),
-                        not(hasFlag(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)));
-            }
+        rule.getScenario().onActivity(activity -> {
+            final WindowInsetsCompat insets = ViewCompat.getRootWindowInsets(
+                    activity.getWindow().getDecorView()
+            );
+            final Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            assertThat(systemBars.top, is(not(0)));
+            assertThat(systemBars.bottom, is(not(0)));
         });
     }
 
@@ -164,19 +160,4 @@ public class MainActivityTest {
             }
         };
     }
-
-    private static Matcher<? super Integer> hasFlag(final int flag) {
-        return new TypeSafeMatcher<Integer>() {
-            @Override
-            protected boolean matchesSafely(Integer i) {
-                return (i & flag) == flag;
-            }
-
-            @Override
-            public void describeTo(Description description) {
-                description.appendText("Flag integer contains " + flag);
-            }
-        };
-    }
-
 }

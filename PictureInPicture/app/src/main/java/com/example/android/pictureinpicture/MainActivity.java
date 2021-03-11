@@ -27,108 +27,132 @@ import android.content.res.Configuration;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.annotation.DrawableRes;
-import androidx.appcompat.app.AppCompatActivity;
 import android.util.Rational;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ScrollView;
 
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
+
 import com.example.android.pictureinpicture.widget.MovieView;
 
 import java.util.ArrayList;
 
-/** Demonstrates usage of Picture-in-Picture mode on phones and tablets. */
+/**
+ * Demonstrates usage of Picture-in-Picture mode on phones and tablets.
+ */
 public class MainActivity extends AppCompatActivity {
 
-    /** Intent action for media controls from Picture-in-Picture mode. */
+    /**
+     * Intent action for media controls from Picture-in-Picture mode.
+     */
     private static final String ACTION_MEDIA_CONTROL = "media_control";
 
-    /** Intent extra for media controls from Picture-in-Picture mode. */
+    /**
+     * Intent extra for media controls from Picture-in-Picture mode.
+     */
     private static final String EXTRA_CONTROL_TYPE = "control_type";
 
-    /** The request code for play action PendingIntent. */
+    /**
+     * The request code for play action PendingIntent.
+     */
     private static final int REQUEST_PLAY = 1;
 
-    /** The request code for pause action PendingIntent. */
+    /**
+     * The request code for pause action PendingIntent.
+     */
     private static final int REQUEST_PAUSE = 2;
 
-    /** The request code for info action PendingIntent. */
+    /**
+     * The request code for info action PendingIntent.
+     */
     private static final int REQUEST_INFO = 3;
 
-    /** The intent extra value for play action. */
+    /**
+     * The intent extra value for play action.
+     */
     private static final int CONTROL_TYPE_PLAY = 1;
 
-    /** The intent extra value for pause action. */
+    /**
+     * The intent extra value for pause action.
+     */
     private static final int CONTROL_TYPE_PAUSE = 2;
 
-    /** The arguments to be used for Picture-in-Picture mode. */
+    /**
+     * The arguments to be used for Picture-in-Picture mode.
+     */
     private final PictureInPictureParams.Builder mPictureInPictureParamsBuilder =
             new PictureInPictureParams.Builder();
 
-    /** This shows the video. */
+    /**
+     * This shows the video.
+     */
     private MovieView mMovieView;
 
-    /** The bottom half of the screen; hidden on landscape */
+    /**
+     * The bottom half of the screen; hidden on landscape
+     */
     private ScrollView mScrollView;
 
-    /** A {@link BroadcastReceiver} to receive action item events from Picture-in-Picture mode. */
+    /**
+     * A {@link BroadcastReceiver} to receive action item events from Picture-in-Picture mode.
+     */
     private BroadcastReceiver mReceiver;
 
     private String mPlay;
     private String mPause;
 
-    private final View.OnClickListener mOnClickListener =
-            new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    switch (view.getId()) {
-                        case R.id.pip:
-                            minimize();
-                            break;
-                    }
-                }
-            };
+    private final View.OnClickListener mOnClickListener = view -> {
+        if (view.getId() == R.id.pip) {
+            minimize();
+        }
+    };
 
-    /** Callbacks from the {@link MovieView} showing the video playback. */
-    private MovieView.MovieListener mMovieListener =
-            new MovieView.MovieListener() {
+    /**
+     * Callbacks from the {@link MovieView} showing the video playback.
+     */
+    private final MovieView.MovieListener mMovieListener = new MovieView.MovieListener() {
 
-                @Override
-                public void onMovieStarted() {
-                    // We are playing the video now. In PiP mode, we want to show an action item to
-                    // pause
-                    // the video.
-                    updatePictureInPictureActions(
-                            R.drawable.ic_pause_24dp, mPause, CONTROL_TYPE_PAUSE, REQUEST_PAUSE);
-                }
+        @Override
+        public void onMovieStarted() {
+            // We are playing the video now. In PiP mode, we want to show an action item to
+            // pause the video.
+            updatePictureInPictureActions(
+                    R.drawable.ic_pause_24dp, mPause, CONTROL_TYPE_PAUSE, REQUEST_PAUSE);
+        }
 
-                @Override
-                public void onMovieStopped() {
-                    // The video stopped or reached its end. In PiP mode, we want to show an action
-                    // item to play the video.
-                    updatePictureInPictureActions(
-                            R.drawable.ic_play_arrow_24dp, mPlay, CONTROL_TYPE_PLAY, REQUEST_PLAY);
-                }
+        @Override
+        public void onMovieStopped() {
+            // The video stopped or reached its end. In PiP mode, we want to show an action
+            // item to play the video.
+            updatePictureInPictureActions(
+                    R.drawable.ic_play_arrow_24dp, mPlay, CONTROL_TYPE_PLAY, REQUEST_PLAY);
+        }
 
-                @Override
-                public void onMovieMinimized() {
-                    // The MovieView wants us to minimize it. We enter Picture-in-Picture mode now.
-                    minimize();
-                }
-            };
+        @Override
+        public void onMovieMinimized() {
+            // The MovieView wants us to minimize it. We enter Picture-in-Picture mode now.
+            minimize();
+        }
+    };
 
     /**
      * Update the state of pause/resume action item in Picture-in-Picture mode.
      *
-     * @param iconId The icon to be used.
-     * @param title The title text.
+     * @param iconId      The icon to be used.
+     * @param title       The title text.
      * @param controlType The type of the action. either {@link #CONTROL_TYPE_PLAY} or {@link
-     *     #CONTROL_TYPE_PAUSE}.
+     *                    #CONTROL_TYPE_PAUSE}.
      * @param requestCode The request code for the {@link PendingIntent}.
      */
     void updatePictureInPictureActions(
-            @DrawableRes int iconId, String title, int controlType, int requestCode) {
+            @DrawableRes int iconId, String title, int controlType, int requestCode
+    ) {
         final ArrayList<RemoteAction> actions = new ArrayList<>();
 
         // This is the PendingIntent that is invoked when a user clicks on the action item.
@@ -205,7 +229,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         adjustFullScreen(newConfig);
     }
@@ -258,7 +282,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    /** Enters Picture-in-Picture mode. */
+    /**
+     * Enters Picture-in-Picture mode.
+     */
     void minimize() {
         if (mMovieView == null) {
             return;
@@ -277,25 +303,22 @@ public class MainActivity extends AppCompatActivity {
      * @param config The current {@link Configuration}.
      */
     private void adjustFullScreen(Configuration config) {
-        final View decorView = getWindow().getDecorView();
+        final WindowInsetsControllerCompat insetsController =
+                ViewCompat.getWindowInsetsController(getWindow().getDecorView());
         if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            decorView.setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_FULLSCREEN
-                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+            insetsController.hide(WindowInsetsCompat.Type.systemBars());
             mScrollView.setVisibility(View.GONE);
             mMovieView.setAdjustViewBounds(false);
         } else {
-            decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            insetsController.show(WindowInsetsCompat.Type.systemBars());
             mScrollView.setVisibility(View.VISIBLE);
             mMovieView.setAdjustViewBounds(true);
         }
     }
 
-    /** Launches {@link MediaSessionPlaybackActivity} and closes this activity. */
+    /**
+     * Launches {@link MediaSessionPlaybackActivity} and closes this activity.
+     */
     private class SwitchActivityOnClick implements View.OnClickListener {
         @Override
         public void onClick(View view) {

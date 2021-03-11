@@ -17,7 +17,9 @@
 package com.example.android.pictureinpicture
 
 import android.content.pm.ActivityInfo
-import androidx.test.platform.app.InstrumentationRegistry
+import android.view.View
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.UiController
 import androidx.test.espresso.ViewAction
@@ -26,12 +28,14 @@ import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.rule.ActivityTestRule
+import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import android.view.View
+import androidx.test.filters.LargeTest
+import androidx.test.platform.app.InstrumentationRegistry
 import com.example.android.pictureinpicture.widget.MovieView
 import org.hamcrest.Description
 import org.hamcrest.Matcher
+import org.hamcrest.Matchers.`is`
 import org.hamcrest.Matchers.not
 import org.hamcrest.TypeSafeMatcher
 import org.hamcrest.core.AllOf.allOf
@@ -42,27 +46,28 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-
 @RunWith(AndroidJUnit4::class)
+@LargeTest
 class MainActivityTest {
 
-    @Rule @JvmField
-    val rule = ActivityTestRule(MainActivity::class.java)
+    @Rule
+    @JvmField
+    val rule = ActivityScenarioRule(MainActivity::class.java)
 
     @Test
     fun movie_playingOnPip() {
         // The movie should be playing on start
         onView(withId(R.id.movie))
-                .check(matches(allOf(isDisplayed(), isPlaying())))
-                .perform(showControls())
+            .check(matches(allOf(isDisplayed(), isPlaying())))
+            .perform(showControls())
         // Click on the button to enter Picture-in-Picture mode
         onView(withId(R.id.minimize)).perform(click())
         InstrumentationRegistry.getInstrumentation().waitForIdleSync()
         // The Activity is paused. We cannot use Espresso to test paused activities.
-        rule.runOnUiThread {
+        rule.scenario.onActivity { activity ->
             // We are now in Picture-in-Picture mode
-            assertTrue(rule.activity.isInPictureInPictureMode)
-            val view = rule.activity.findViewById<MovieView>(R.id.movie)
+            assertTrue(activity.isInPictureInPictureMode)
+            val view = activity.findViewById<MovieView>(R.id.movie)
             assertNotNull(view)
             // The video should still be playing
             assertTrue(view.isPlaying)
@@ -73,8 +78,8 @@ class MainActivityTest {
     fun movie_pauseAndResume() {
         // The movie should be playing on start
         onView(withId(R.id.movie))
-                .check(matches(allOf(isDisplayed(), isPlaying())))
-                .perform(showControls())
+            .check(matches(allOf(isDisplayed(), isPlaying())))
+            .perform(showControls())
         // Pause
         onView(withId(R.id.toggle)).perform(click())
         onView(withId(R.id.movie)).check(matches(not(isPlaying())))
@@ -85,25 +90,31 @@ class MainActivityTest {
 
     @Test
     fun fullscreen_enabledOnLandscape() {
-        rule.runOnUiThread { rule.activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE }
+        rule.scenario.onActivity { activity ->
+            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        }
         InstrumentationRegistry.getInstrumentation().waitForIdleSync()
-        rule.runOnUiThread {
-            val decorView = rule.activity.window.decorView
-            assertThat(decorView.systemUiVisibility,
-                    hasFlag(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN))
+        rule.scenario.onActivity { activity ->
+            val insets = ViewCompat.getRootWindowInsets(activity.window.decorView)!!
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            assertThat(systemBars.left, `is`(0))
+            assertThat(systemBars.top, `is`(0))
+            assertThat(systemBars.right, `is`(0))
+            assertThat(systemBars.bottom, `is`(0))
         }
     }
 
     @Test
     fun fullscreen_disabledOnPortrait() {
-        rule.runOnUiThread {
-            rule.activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        rule.scenario.onActivity { activity ->
+            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
         InstrumentationRegistry.getInstrumentation().waitForIdleSync()
-        rule.runOnUiThread {
-            val decorView = rule.activity.window.decorView
-            assertThat(decorView.systemUiVisibility,
-                    not(hasFlag(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)))
+        rule.scenario.onActivity { activity ->
+            val insets = ViewCompat.getRootWindowInsets(activity.window.decorView)!!
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            assertThat(systemBars.top, `is`(not(0)))
+            assertThat(systemBars.bottom, `is`(not(0)))
         }
     }
 
@@ -136,17 +147,4 @@ class MainActivityTest {
             }
         }
     }
-
-    private fun hasFlag(flag: Int): Matcher<in Int> {
-        return object : TypeSafeMatcher<Int>() {
-            override fun matchesSafely(i: Int?): Boolean {
-                return i?.and(flag) == flag
-            }
-
-            override fun describeTo(description: Description) {
-                description.appendText("Flag integer contains " + flag)
-            }
-        }
-    }
-
 }

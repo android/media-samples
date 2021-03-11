@@ -20,8 +20,8 @@ import android.content.Context
 import android.graphics.Color
 import android.media.MediaPlayer
 import android.os.Handler
+import android.os.Looper
 import android.os.Message
-import androidx.annotation.RawRes
 import android.transition.TransitionManager
 import android.util.AttributeSet
 import android.util.Log
@@ -29,23 +29,25 @@ import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.View
+import android.view.View.OnClickListener
 import android.widget.ImageButton
 import android.widget.RelativeLayout
+import androidx.annotation.RawRes
 import com.example.android.pictureinpicture.R
 import java.io.IOException
 import java.lang.ref.WeakReference
 
-
 /**
  * Provides video playback. There is nothing directly related to Picture-in-Picture here.
-
  *
  * This is similar to [android.widget.VideoView], but it comes with a custom control
  * (play/pause, fast forward, and fast rewind).
  */
-class MovieView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null,
-                                          defStyleAttr: Int = 0) :
-        RelativeLayout(context, attrs, defStyleAttr) {
+class MovieView @JvmOverloads constructor(
+        context: Context,
+        attrs: AttributeSet? = null,
+        defStyleAttr: Int = 0
+) : RelativeLayout(context, attrs, defStyleAttr) {
 
     companion object {
 
@@ -56,7 +58,6 @@ class MovieView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
 
         /** The amount of time until we fade out the controls.  */
         private const val TIMEOUT_CONTROLS = 3000L // ms
-
     }
 
     /**
@@ -81,46 +82,46 @@ class MovieView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     }
 
     /** Shows the video playback.  */
-    private val mSurfaceView: SurfaceView
+    private val surfaceView: SurfaceView
 
     // Controls
-    private val mToggle: ImageButton
-    private val mShade: View
-    private val mFastForward: ImageButton
-    private val mFastRewind: ImageButton
-    private val mMinimize: ImageButton
+    private val toggle: ImageButton
+    private val shade: View
+    private val fastForward: ImageButton
+    private val fastRewind: ImageButton
+    private val minimize: ImageButton
 
     /** This plays the video. This will be null when no video is set.  */
-    internal var mMediaPlayer: MediaPlayer? = null
+    internal var mediaPlayer: MediaPlayer? = null
 
     /** The resource ID for the video to play.  */
     @RawRes
-    private var mVideoResourceId: Int = 0
+    private var videoResourceId: Int = 0
 
     var title: String = ""
 
     /** Whether we adjust our view bounds or we fill the remaining area with black bars  */
-    private var mAdjustViewBounds: Boolean = false
+    private var adjustViewBounds: Boolean = false
 
     /** Handles timeout for media controls.  */
-    private var mTimeoutHandler: TimeoutHandler? = null
+    private var timeoutHandler: TimeoutHandler? = null
 
     /** The listener for all the events we publish.  */
-    private var mMovieListener: MovieListener? = null
+    private var movieListener: MovieListener? = null
 
-    private var mSavedCurrentPosition: Int = 0
+    private var savedCurrentPosition: Int = 0
 
     init {
         setBackgroundColor(Color.BLACK)
 
         // Inflate the content
         View.inflate(context, R.layout.view_movie, this)
-        mSurfaceView = findViewById(R.id.surface)
-        mShade = findViewById<View>(R.id.shade)
-        mToggle = findViewById(R.id.toggle)
-        mFastForward = findViewById(R.id.fast_forward)
-        mFastRewind = findViewById(R.id.fast_rewind)
-        mMinimize = findViewById(R.id.minimize)
+        surfaceView = findViewById(R.id.surface)
+        shade = findViewById(R.id.shade)
+        toggle = findViewById(R.id.toggle)
+        fastForward = findViewById(R.id.fast_forward)
+        fastRewind = findViewById(R.id.fast_rewind)
+        minimize = findViewById(R.id.minimize)
 
         // Attributes
         val a = context.obtainStyledAttributes(attrs, R.styleable.MovieView,
@@ -137,14 +138,14 @@ class MovieView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
                 R.id.toggle -> toggle()
                 R.id.fast_forward -> fastForward()
                 R.id.fast_rewind -> fastRewind()
-                R.id.minimize -> mMovieListener?.onMovieMinimized()
+                R.id.minimize -> movieListener?.onMovieMinimized()
             }
             // Start or reset the timeout to hide controls
-            mMediaPlayer?.let { player ->
-                if (mTimeoutHandler == null) {
-                    mTimeoutHandler = TimeoutHandler(this@MovieView)
+            mediaPlayer?.let { player ->
+                if (timeoutHandler == null) {
+                    timeoutHandler = TimeoutHandler(this@MovieView)
                 }
-                mTimeoutHandler?.let { handler ->
+                timeoutHandler?.let { handler ->
                     handler.removeMessages(TimeoutHandler.MESSAGE_HIDE_CONTROLS)
                     if (player.isPlaying) {
                         handler.sendEmptyMessageDelayed(TimeoutHandler.MESSAGE_HIDE_CONTROLS,
@@ -153,14 +154,14 @@ class MovieView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
                 }
             }
         }
-        mSurfaceView.setOnClickListener(listener)
-        mToggle.setOnClickListener(listener)
-        mFastForward.setOnClickListener(listener)
-        mFastRewind.setOnClickListener(listener)
-        mMinimize.setOnClickListener(listener)
+        surfaceView.setOnClickListener(listener)
+        toggle.setOnClickListener(listener)
+        fastForward.setOnClickListener(listener)
+        fastRewind.setOnClickListener(listener)
+        minimize.setOnClickListener(listener)
 
         // Prepare video playback
-        mSurfaceView.holder.addCallback(object : SurfaceHolder.Callback {
+        surfaceView.holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder) {
                 openVideo(holder.surface)
             }
@@ -171,14 +172,14 @@ class MovieView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
             }
 
             override fun surfaceDestroyed(holder: SurfaceHolder) {
-                mMediaPlayer?.let { mSavedCurrentPosition = it.currentPosition }
+                mediaPlayer?.let { savedCurrentPosition = it.currentPosition }
                 closeVideo()
             }
         })
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        mMediaPlayer?.let { player ->
+        mediaPlayer?.let { player ->
             val videoWidth = player.videoWidth
             val videoHeight = player.videoHeight
             if (videoWidth != 0 && videoHeight != 0) {
@@ -187,7 +188,7 @@ class MovieView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
                 val widthMode = MeasureSpec.getMode(widthMeasureSpec)
                 val height = MeasureSpec.getSize(heightMeasureSpec)
                 val heightMode = MeasureSpec.getMode(heightMeasureSpec)
-                if (mAdjustViewBounds) {
+                if (adjustViewBounds) {
                     if (widthMode == MeasureSpec.EXACTLY
                             && heightMode != MeasureSpec.EXACTLY) {
                         super.onMeasure(widthMeasureSpec,
@@ -220,8 +221,8 @@ class MovieView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     }
 
     override fun onDetachedFromWindow() {
-        mTimeoutHandler?.removeMessages(TimeoutHandler.MESSAGE_HIDE_CONTROLS)
-        mTimeoutHandler = null
+        timeoutHandler?.removeMessages(TimeoutHandler.MESSAGE_HIDE_CONTROLS)
+        timeoutHandler = null
         super.onDetachedFromWindow()
     }
 
@@ -230,7 +231,7 @@ class MovieView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
 
      * @return ID of the video resource.
      */
-    fun getVideoResourceId(): Int = mVideoResourceId
+    fun getVideoResourceId(): Int = videoResourceId
 
     /**
      * Sets the listener to monitor movie events.
@@ -238,7 +239,7 @@ class MovieView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
      * @param movieListener The listener to be set.
      */
     fun setMovieListener(movieListener: MovieListener?) {
-        mMovieListener = movieListener
+        this.movieListener = movieListener
     }
 
     /**
@@ -247,11 +248,11 @@ class MovieView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
      * @param id The raw resource ID.
      */
     private fun setVideoResourceId(@RawRes id: Int) {
-        if (id == mVideoResourceId) {
+        if (id == videoResourceId) {
             return
         }
-        mVideoResourceId = id
-        val surface = mSurfaceView.holder.surface
+        videoResourceId = id
+        val surface = surfaceView.holder.surface
         if (surface != null && surface.isValid) {
             closeVideo()
             openVideo(surface)
@@ -259,10 +260,10 @@ class MovieView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     }
 
     fun setAdjustViewBounds(adjustViewBounds: Boolean) {
-        if (mAdjustViewBounds == adjustViewBounds) {
+        if (this.adjustViewBounds == adjustViewBounds) {
             return
         }
-        mAdjustViewBounds = adjustViewBounds
+        this.adjustViewBounds = adjustViewBounds
         if (adjustViewBounds) {
             background = null
         } else {
@@ -276,11 +277,11 @@ class MovieView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
      */
     fun showControls() {
         TransitionManager.beginDelayedTransition(this)
-        mShade.visibility = View.VISIBLE
-        mToggle.visibility = View.VISIBLE
-        mFastForward.visibility = View.VISIBLE
-        mFastRewind.visibility = View.VISIBLE
-        mMinimize.visibility = View.VISIBLE
+        shade.visibility = View.VISIBLE
+        toggle.visibility = View.VISIBLE
+        fastForward.visibility = View.VISIBLE
+        fastRewind.visibility = View.VISIBLE
+        minimize.visibility = View.VISIBLE
     }
 
     /**
@@ -288,25 +289,25 @@ class MovieView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
      */
     fun hideControls() {
         TransitionManager.beginDelayedTransition(this)
-        mShade.visibility = View.INVISIBLE
-        mToggle.visibility = View.INVISIBLE
-        mFastForward.visibility = View.INVISIBLE
-        mFastRewind.visibility = View.INVISIBLE
-        mMinimize.visibility = View.INVISIBLE
+        shade.visibility = View.INVISIBLE
+        toggle.visibility = View.INVISIBLE
+        fastForward.visibility = View.INVISIBLE
+        fastRewind.visibility = View.INVISIBLE
+        minimize.visibility = View.INVISIBLE
     }
 
     /**
      * Fast-forward the video.
      */
     private fun fastForward() {
-        mMediaPlayer?.let { it.seekTo(it.currentPosition + FAST_FORWARD_REWIND_INTERVAL) }
+        mediaPlayer?.let { it.seekTo(it.currentPosition + FAST_FORWARD_REWIND_INTERVAL) }
     }
 
     /**
      * Fast-rewind the video.
      */
     private fun fastRewind() {
-        mMediaPlayer?.let { it.seekTo(it.currentPosition - FAST_FORWARD_REWIND_INTERVAL) }
+        mediaPlayer?.let { it.seekTo(it.currentPosition - FAST_FORWARD_REWIND_INTERVAL) }
     }
 
     /**
@@ -315,38 +316,38 @@ class MovieView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
 
      * @return The current position of the video.
      */
-    fun getCurrentPosition(): Int = mMediaPlayer?.currentPosition ?: 0
+    fun getCurrentPosition(): Int = mediaPlayer?.currentPosition ?: 0
 
     val isPlaying: Boolean
-        get() = mMediaPlayer?.isPlaying ?: false
+        get() = mediaPlayer?.isPlaying ?: false
 
     fun play() {
-        if (mMediaPlayer == null) {
+        if (mediaPlayer == null) {
             return
         }
-        mMediaPlayer!!.start()
+        mediaPlayer!!.start()
         adjustToggleState()
         keepScreenOn = true
-        mMovieListener?.onMovieStarted()
+        movieListener?.onMovieStarted()
     }
 
     fun pause() {
-        if (mMediaPlayer == null) {
+        if (mediaPlayer == null) {
             adjustToggleState()
             return
         }
-        mMediaPlayer!!.pause()
+        mediaPlayer!!.pause()
         adjustToggleState()
         keepScreenOn = false
-        mMovieListener?.onMovieStopped()
+        movieListener?.onMovieStopped()
     }
 
     internal fun openVideo(surface: Surface) {
-        if (mVideoResourceId == 0) {
+        if (videoResourceId == 0) {
             return
         }
-        mMediaPlayer = MediaPlayer()
-        mMediaPlayer?.let { player ->
+        mediaPlayer = MediaPlayer()
+        mediaPlayer?.let { player ->
             player.setSurface(surface)
             startVideo()
         }
@@ -356,17 +357,17 @@ class MovieView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
      * Restarts playback of the video.
      */
     fun startVideo() {
-        mMediaPlayer?.let { player ->
+        mediaPlayer?.let { player ->
             player.reset()
             try {
-                resources.openRawResourceFd(mVideoResourceId).use { fd ->
+                resources.openRawResourceFd(videoResourceId).use { fd ->
                     player.setDataSource(fd)
                     player.setOnPreparedListener { mediaPlayer ->
                         // Adjust the aspect ratio of this view
                         requestLayout()
-                        if (mSavedCurrentPosition > 0) {
-                            mediaPlayer.seekTo(mSavedCurrentPosition)
-                            mSavedCurrentPosition = 0
+                        if (savedCurrentPosition > 0) {
+                            mediaPlayer.seekTo(savedCurrentPosition)
+                            savedCurrentPosition = 0
                         } else {
                             // Start automatically
                             play()
@@ -375,7 +376,7 @@ class MovieView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
                     player.setOnCompletionListener {
                         adjustToggleState()
                         keepScreenOn = false
-                        mMovieListener?.onMovieStopped()
+                        movieListener?.onMovieStopped()
                     }
                     player.prepare()
                 }
@@ -386,16 +387,16 @@ class MovieView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     }
 
     internal fun closeVideo() {
-        mMediaPlayer?.release()
-        mMediaPlayer = null
+        mediaPlayer?.release()
+        mediaPlayer = null
     }
 
     private fun toggle() {
-        mMediaPlayer?.let { if (it.isPlaying) pause() else play() }
+        mediaPlayer?.let { if (it.isPlaying) pause() else play() }
     }
 
     private fun toggleControls() {
-        if (mShade.visibility == View.VISIBLE) {
+        if (shade.visibility == View.VISIBLE) {
             hideControls()
         } else {
             showControls()
@@ -403,25 +404,25 @@ class MovieView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     }
 
     private fun adjustToggleState() {
-        mMediaPlayer?.let {
+        mediaPlayer?.let {
             if (it.isPlaying) {
-                mToggle.contentDescription = resources.getString(R.string.pause)
-                mToggle.setImageResource(R.drawable.ic_pause_64dp)
+                toggle.contentDescription = resources.getString(R.string.pause)
+                toggle.setImageResource(R.drawable.ic_pause_64dp)
             } else {
-                mToggle.contentDescription = resources.getString(R.string.play)
-                mToggle.setImageResource(R.drawable.ic_play_arrow_64dp)
+                toggle.contentDescription = resources.getString(R.string.play)
+                toggle.setImageResource(R.drawable.ic_play_arrow_64dp)
             }
         }
     }
 
-    private class TimeoutHandler(view: MovieView) : Handler() {
+    private class TimeoutHandler(view: MovieView) : Handler(Looper.getMainLooper()) {
 
-        private val mMovieViewRef: WeakReference<MovieView> = WeakReference(view)
+        private val movieViewRef: WeakReference<MovieView> = WeakReference(view)
 
         override fun handleMessage(msg: Message) {
             when (msg.what) {
                 MESSAGE_HIDE_CONTROLS -> {
-                    mMovieViewRef.get()?.hideControls()
+                    movieViewRef.get()?.hideControls()
                 }
                 else -> super.handleMessage(msg)
             }
@@ -430,7 +431,5 @@ class MovieView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         companion object {
             const val MESSAGE_HIDE_CONTROLS = 1
         }
-
     }
-
 }
