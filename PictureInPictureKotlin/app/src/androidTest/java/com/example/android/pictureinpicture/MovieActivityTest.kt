@@ -50,10 +50,10 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-class MediaSessionPlaybackActivityTest {
+class MovieActivityTest {
 
     @Rule @JvmField
-    val rule = ActivityScenarioRule(MediaSessionPlaybackActivity::class.java)
+    val rule = ActivityScenarioRule(MovieActivity::class.java)
 
     @Test
     fun movie_playingOnPip() {
