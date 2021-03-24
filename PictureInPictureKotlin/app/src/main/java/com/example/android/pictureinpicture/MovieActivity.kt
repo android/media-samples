@@ -28,14 +28,12 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.text.util.Linkify
 import android.util.Rational
 import android.view.View
-import android.widget.Button
-import android.widget.ScrollView
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.doOnLayout
+import com.example.android.pictureinpicture.databinding.MovieActivityBinding
 import com.example.android.pictureinpicture.widget.MovieView
 
 /**
@@ -60,13 +58,9 @@ class MovieActivity : AppCompatActivity() {
         private const val PLAYLIST_SIZE = 2
     }
 
+    private lateinit var binding: MovieActivityBinding
+
     private lateinit var session: MediaSessionCompat
-
-    /** This shows the video.  */
-    private lateinit var movieView: MovieView
-
-    /** The bottom half of the screen; hidden on landscape  */
-    private lateinit var scrollView: ScrollView
 
     private val rect = Rect()
 
@@ -78,25 +72,21 @@ class MovieActivity : AppCompatActivity() {
         override fun onMovieStarted() {
             // We are playing the video now. Update the media session state and the PiP window will
             // update the actions.
-            movieView.let { view ->
-                updatePlaybackState(
-                    PlaybackStateCompat.STATE_PLAYING,
-                    view.getCurrentPosition(),
-                    view.getVideoResourceId()
-                )
-            }
+            updatePlaybackState(
+                PlaybackStateCompat.STATE_PLAYING,
+                binding.movie.getCurrentPosition(),
+                binding.movie.getVideoResourceId()
+            )
         }
 
         override fun onMovieStopped() {
-            // The video stopped or reached its end. Update the media session state and the PiP window will
-            // update the actions.
-            movieView.let { view ->
-                updatePlaybackState(
-                    PlaybackStateCompat.STATE_PAUSED,
-                    view.getCurrentPosition(),
-                    view.getVideoResourceId()
-                )
-            }
+            // The video stopped or reached its end. Update the media session state and the PiP
+            // window will update the actions.
+            updatePlaybackState(
+                PlaybackStateCompat.STATE_PAUSED,
+                binding.movie.getCurrentPosition(),
+                binding.movie.getVideoResourceId()
+            )
         }
 
         override fun onMovieMinimized() {
@@ -107,26 +97,22 @@ class MovieActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.movie_activity)
+        binding = MovieActivityBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        // View references
-        movieView = findViewById(R.id.movie)
-        scrollView = findViewById(R.id.scroll)
-        val switchExampleButton = findViewById<Button>(R.id.switch_example)
-        switchExampleButton.setOnClickListener {
+        Linkify.addLinks(binding.explanation, Linkify.ALL)
+        binding.pip.setOnClickListener { minimize() }
+        binding.switchExample.setOnClickListener {
             startActivity(Intent(this@MovieActivity, MainActivity::class.java))
             finish()
         }
-        val explanation: TextView = findViewById(R.id.explanation)
-        Linkify.addLinks(explanation, Linkify.ALL)
+
+        // Configure parameters for the picture-in-picture mode. We do this at the first layout of
+        // the MovieView because we use its layout position and size.
+        binding.movie.doOnLayout { updatePictureInPictureParams() }
 
         // Set up the video; it automatically starts.
-        movieView.setMovieListener(movieListener)
-        findViewById<View>(R.id.pip).setOnClickListener {
-            minimize()
-        }
-
-        movieView.doOnLayout { updatePictureInPictureParams() }
+        binding.movie.setMovieListener(movieListener)
     }
 
     override fun onStart() {
@@ -140,13 +126,13 @@ class MovieActivity : AppCompatActivity() {
         MediaControllerCompat.setMediaController(this, session.controller)
 
         val metadata = MediaMetadataCompat.Builder()
-            .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, movieView.title)
+            .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, binding.movie.title)
             .build()
         session.setMetadata(metadata)
 
-        session.setCallback(MediaSessionCallback(movieView))
+        session.setCallback(MediaSessionCallback(binding.movie))
 
-        val state = if (movieView.isPlaying) {
+        val state = if (binding.movie.isPlaying) {
             PlaybackStateCompat.STATE_PLAYING
         } else {
             PlaybackStateCompat.STATE_PAUSED
@@ -154,8 +140,8 @@ class MovieActivity : AppCompatActivity() {
         updatePlaybackState(
             state,
             MEDIA_ACTIONS_ALL,
-            movieView.getCurrentPosition(),
-            movieView.getVideoResourceId()
+            binding.movie.getCurrentPosition(),
+            binding.movie.getVideoResourceId()
         )
     }
 
@@ -163,7 +149,7 @@ class MovieActivity : AppCompatActivity() {
         super.onStop()
         // On entering Picture-in-Picture mode, onPause is called, but not onStop.
         // For this reason, this is the place where we should pause the video playback.
-        movieView.pause()
+        binding.movie.pause()
         session.release()
     }
 
@@ -171,7 +157,7 @@ class MovieActivity : AppCompatActivity() {
         super.onRestart()
         if (!isInPictureInPictureMode) {
             // Show the video controls so the video can be easily resumed.
-            movieView.showControls()
+            binding.movie.showControls()
         }
     }
 
@@ -193,20 +179,20 @@ class MovieActivity : AppCompatActivity() {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
         if (isInPictureInPictureMode) {
             // Hide the controls in picture-in-picture mode.
-            movieView.hideControls()
+            binding.movie.hideControls()
         } else {
             // Show the video controls if the video is not playing
-            if (!movieView.isPlaying) {
-                movieView.showControls()
+            if (!binding.movie.isPlaying) {
+                binding.movie.showControls()
             }
         }
     }
 
     private fun updatePictureInPictureParams(): PictureInPictureParams {
         // Calculate the aspect ratio of the PiP screen.
-        val aspectRatio = Rational(movieView.width, movieView.height)
+        val aspectRatio = Rational(binding.movie.width, binding.movie.height)
         // The movie view turns into the picture-in-picture mode.
-        movieView.getGlobalVisibleRect(rect)
+        binding.movie.getGlobalVisibleRect(rect)
         val params = PictureInPictureParams.Builder()
             .setAspectRatio(aspectRatio)
             // Specify the portion of the screen that turns into the picture-in-picture mode.
@@ -238,12 +224,12 @@ class MovieActivity : AppCompatActivity() {
             WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             insetsController?.hide(WindowInsetsCompat.Type.systemBars())
-            scrollView.visibility = View.GONE
-            movieView.setAdjustViewBounds(false)
+            binding.scroll.visibility = View.GONE
+            binding.movie.setAdjustViewBounds(false)
         } else {
             insetsController?.show(WindowInsetsCompat.Type.systemBars())
-            scrollView.visibility = View.VISIBLE
-            movieView.setAdjustViewBounds(true)
+            binding.scroll.visibility = View.VISIBLE
+            binding.movie.setAdjustViewBounds(true)
         }
     }
 
