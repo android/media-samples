@@ -54,8 +54,6 @@ class MainActivity : AppCompatActivity() {
     private val viewModel: MainViewModel by viewModels()
     private lateinit var binding: MainActivityBinding
 
-    private val rect = Rect()
-
     /**
      * A [BroadcastReceiver] for handling action items on the picture-in-picture mode.
      */
@@ -120,7 +118,8 @@ class MainActivity : AppCompatActivity() {
      * [started] state of the stopwatch.
      */
     private fun updatePictureInPictureParams(started: Boolean): PictureInPictureParams {
-        binding.stopwatchBackground.getGlobalVisibleRect(rect)
+        val visibleRect = Rect()
+        binding.stopwatchBackground.getGlobalVisibleRect(visibleRect)
         val params = PictureInPictureParams.Builder()
             // Set action items for the picture-in-picture mode. These are the only custom controls
             // available during the picture-in-picture mode.
@@ -156,7 +155,7 @@ class MainActivity : AppCompatActivity() {
             .setAspectRatio(Rational(16, 9))
             // Specify the portion of the screen that turns into the picture-in-picture mode.
             // This makes the transition animation smoother.
-            .setSourceRectHint(rect)
+            .setSourceRectHint(visibleRect)
             // Turn the screen into the picture-in-picture mode if it's hidden by the "Home" button.
             .setAutoEnterEnabled(true)
             // Disables the seamless resize. The seamless resize works great for videos where the

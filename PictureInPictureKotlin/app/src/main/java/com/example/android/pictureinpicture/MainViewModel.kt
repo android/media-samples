@@ -22,6 +22,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.isActive
@@ -57,13 +58,16 @@ class MainViewModel: ViewModel() {
             job?.cancel()
         } else {
             _started.value = true
-            job = viewModelScope.launch {
-                startUptimeMillis = SystemClock.uptimeMillis() - (timeMillis.value ?: 0L)
-                while (isActive) {
-                    timeMillis.value = SystemClock.uptimeMillis() - startUptimeMillis
-                    awaitFrame()
-                }
-            }
+            job = viewModelScope.launch { start() }
+        }
+    }
+
+    private suspend fun CoroutineScope.start() {
+        startUptimeMillis = SystemClock.uptimeMillis() - (timeMillis.value ?: 0L)
+        while (isActive) {
+            timeMillis.value = SystemClock.uptimeMillis() - startUptimeMillis
+            // Updates on every render frame.
+            awaitFrame()
         }
     }
 

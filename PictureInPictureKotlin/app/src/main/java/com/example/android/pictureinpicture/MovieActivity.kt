@@ -62,8 +62,6 @@ class MovieActivity : AppCompatActivity() {
 
     private lateinit var session: MediaSessionCompat
 
-    private val rect = Rect()
-
     /**
      * Callbacks from the [MovieView] showing the video playback.
      */
@@ -192,12 +190,13 @@ class MovieActivity : AppCompatActivity() {
         // Calculate the aspect ratio of the PiP screen.
         val aspectRatio = Rational(binding.movie.width, binding.movie.height)
         // The movie view turns into the picture-in-picture mode.
-        binding.movie.getGlobalVisibleRect(rect)
+        val visibleRect = Rect()
+        binding.movie.getGlobalVisibleRect(visibleRect)
         val params = PictureInPictureParams.Builder()
             .setAspectRatio(aspectRatio)
             // Specify the portion of the screen that turns into the picture-in-picture mode.
             // This makes the transition animation smoother.
-            .setSourceRectHint(rect)
+            .setSourceRectHint(visibleRect)
             // The screen automatically turns into the picture-in-picture mode when it is hidden
             // by the "Home" button.
             .setAutoEnterEnabled(true)
