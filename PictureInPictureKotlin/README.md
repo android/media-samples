@@ -9,8 +9,8 @@ pause or resume the video.
 Introduction
 ------------
 
-As of Android O, activities can launch in [Picture-in-Picture (PiP)][1] mode. PiP is a
-special type of [multi-window][2] mode mostly used for video playback.
+As of Android 8.0 Oreo (API level 26), activities can launch in [Picture-in-Picture (PiP)][1] mode.
+PiP is a special type of [multi-window][2] mode mostly used for video playback.
 
 The app is *paused* when it enters PiP mode, but it should continue showing content. For this
 reason, you should make sure your app does not pause playback in its [onPause()][3]
@@ -18,15 +18,13 @@ handler. Instead, you should pause video in [onStop()][4]. For more information,
 Lifecycle][5].
 
 To specify that your activity can use PIP mode, set `android:supportsPictureInPicture` to `true` in
-the manifest. (Beginning with the O Developer Preview, you do not need to set
-`android:resizeableActivity` to `true` if you are supporting PIP mode, either on Android TV or on
-other Android devices; you only need to `setrandroid:resizeableActivity` if your activity supports
-other multi-window modes.)
+the manifest. (You do not need to set `android:resizeableActivity` to `true` if you are only
+supporting PIP mode, either on Android TV or on other Android devices; you only need to set
+`android:resizeableActivity` if your activity supports other multi-window modes.)
 
 You can pass a [PictureInPictureParams][6] to [enterPictureInPictureMode()][7] to specify how an
 activity should behave when it is in PiP mode. You can also use it to call
-[setPictureInPictureParams()][8] and update the current behavior. If the app is in not PiP mode, it
-will be used for later call of [enterPictureInPictureMode()][7].
+[setPictureInPictureParams()][8] and update the current behavior.
 
 With a [PictureInPictureParams][6], you can specify aspect ratio of PiP activity and action items
 available for PiP mode. The aspect ratio is used when the activity is in PiP mode. The action items
@@ -42,13 +40,6 @@ item is selected.
 [7]: https://developer.android.com/reference/android/app/Activity.html#enterPictureInPictureMode(android.app.PictureInPictureParams)
 [8]: https://developer.android.com/reference/android/app/Activity.html#setPictureInPictureParams(android.app.PictureInPictureParams)
 [9]: https://developer.android.com/reference/android/app/PendingIntent.html
-
-Pre-requisites
---------------
-
-- Android SDK 26
-- Android Build Tools v26.0.2
-- Android Support Repository
 
 Screenshots
 -------------

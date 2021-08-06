@@ -29,7 +29,7 @@
         android:layout_height="match_parent"
         android:adjustViewBounds="true"
         android:src="@raw/vid_bigbuckbunny"
-        android:title="@string/title_bigbuckbunny"/>
+        android:title="@string/title_bigbuckbunny" />
 
     <ScrollView
         android:id="@+id/scroll"
@@ -42,30 +42,36 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="@dimen/activity_vertical_margin"
-            android:paddingEnd="@dimen/activity_horizontal_margin"
-            android:paddingStart="@dimen/activity_horizontal_margin"
-            android:paddingTop="@dimen/activity_vertical_margin">
+            android:paddingStart="@dimen/spacing_medium"
+            android:paddingTop="@dimen/spacing_medium"
+            android:paddingEnd="@dimen/spacing_medium"
+            android:paddingBottom="@dimen/spacing_medium">
 
             <Button
                 android:id="@+id/pip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/enter_picture_in_picture"/>
+                android:drawableStart="@drawable/ic_picture_in_picture_alt"
+                android:drawablePadding="@dimen/spacing_medium"
+                android:drawableTint="@android:color/black"
+                android:text="@string/enter_picture_in_picture" />
 
             <TextView
                 android:id="@+id/explanation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/activity_vertical_margin"
-                android:text="@string/explanation"
-                android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
+                android:layout_marginTop="@dimen/spacing_medium"
+                android:hyphenationFrequency="normal"
+                android:justificationMode="inter_word"
+                android:text="@string/explanation_movie"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
             <Button
                 android:id="@+id/switch_example"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tools:text="@string/switch_media_session"/>
+                android:layout_marginTop="@dimen/spacing_medium"
+                android:text="@string/switch_custom" />
 
         </LinearLayout>
 

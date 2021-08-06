@@ -34,26 +34,23 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.filters.LargeTest
 import com.example.android.pictureinpicture.widget.MovieView
+import com.google.common.truth.Truth.assertThat
 import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.not
 import org.hamcrest.TypeSafeMatcher
 import org.hamcrest.core.AllOf.allOf
-import org.hamcrest.core.Is.`is`
-import org.hamcrest.core.IsEqual.equalTo
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertThat
-import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-class MediaSessionPlaybackActivityTest {
+class MovieActivityTest {
 
     @Rule @JvmField
-    val rule = ActivityScenarioRule(MediaSessionPlaybackActivity::class.java)
+    val rule = ActivityScenarioRule(MovieActivity::class.java)
 
     @Test
     fun movie_playingOnPip() {
@@ -67,11 +64,11 @@ class MediaSessionPlaybackActivityTest {
         // The Activity is paused. We cannot use Espresso to test paused activities.
         rule.scenario.onActivity { activity ->
             // We are now in Picture-in-Picture mode
-            assertTrue(activity.isInPictureInPictureMode)
+            assertThat(activity.isInPictureInPictureMode).isTrue()
             val view = activity.findViewById<MovieView>(R.id.movie)
             assertNotNull(view)
             // The video should still be playing
-            assertTrue(view.isPlaying)
+            assertThat(view.isPlaying).isTrue()
 
             // The media session state should be playing.
             assertMediaStateIs(PlaybackStateCompat.STATE_PLAYING)
@@ -105,10 +102,10 @@ class MediaSessionPlaybackActivityTest {
         rule.scenario.onActivity { activity ->
             val insets = ViewCompat.getRootWindowInsets(activity.window.decorView)!!
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            assertThat(systemBars.left, `is`(0))
-            assertThat(systemBars.top, `is`(0))
-            assertThat(systemBars.right, `is`(0))
-            assertThat(systemBars.bottom, `is`(0))
+            assertThat(systemBars.left).isEqualTo(0)
+            assertThat(systemBars.top).isEqualTo(0)
+            assertThat(systemBars.right).isEqualTo(0)
+            assertThat(systemBars.bottom).isEqualTo(0)
         }
     }
 
@@ -121,8 +118,8 @@ class MediaSessionPlaybackActivityTest {
         rule.scenario.onActivity { activity ->
             val insets = ViewCompat.getRootWindowInsets(activity.window.decorView)!!
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            assertThat(systemBars.top, `is`(not(0)))
-            assertThat(systemBars.bottom, `is`(not(0)))
+            assertThat(systemBars.top).isNotEqualTo(0)
+            assertThat(systemBars.bottom).isNotEqualTo(0)
         }
     }
 
@@ -130,11 +127,7 @@ class MediaSessionPlaybackActivityTest {
         rule.scenario.onActivity { activity ->
             val state = activity.mediaController.playbackState
             assertNotNull(state)
-            assertThat(
-                "MediaSession is not in the correct state",
-                state!!.state,
-                `is`(equalTo(expectedState))
-            )
+            assertThat(state!!.state).isEqualTo(expectedState)
         }
     }
 

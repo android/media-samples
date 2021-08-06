@@ -24,257 +24,170 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Configuration
+import android.graphics.Rect
 import android.graphics.drawable.Icon
-import android.net.Uri
 import android.os.Bundle
 import android.util.Rational
 import android.view.View
-import android.widget.Button
-import android.widget.ScrollView
+import androidx.activity.viewModels
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
-import com.example.android.pictureinpicture.widget.MovieView
+import com.example.android.pictureinpicture.databinding.MainActivityBinding
+
+/** Intent action for stopwatch controls from Picture-in-Picture mode.  */
+private const val ACTION_STOPWATCH_CONTROL = "stopwatch_control"
+
+/** Intent extra for stopwatch controls from Picture-in-Picture mode.  */
+private const val EXTRA_CONTROL_TYPE = "control_type"
+private const val CONTROL_TYPE_CLEAR = 1
+private const val CONTROL_TYPE_START_OR_PAUSE = 2
+
+private const val REQUEST_CLEAR = 3
+private const val REQUEST_START_OR_PAUSE = 4
 
 /**
  * Demonstrates usage of Picture-in-Picture mode on phones and tablets.
  */
 class MainActivity : AppCompatActivity() {
 
-    companion object {
+    private val viewModel: MainViewModel by viewModels()
+    private lateinit var binding: MainActivityBinding
 
-        /** Intent action for media controls from Picture-in-Picture mode.  */
-        private const val ACTION_MEDIA_CONTROL = "media_control"
+    /**
+     * A [BroadcastReceiver] for handling action items on the picture-in-picture mode.
+     */
+    private val broadcastReceiver = object : BroadcastReceiver() {
 
-        /** Intent extra for media controls from Picture-in-Picture mode.  */
-        private const val EXTRA_CONTROL_TYPE = "control_type"
-
-        /** The request code for play action PendingIntent.  */
-        private const val REQUEST_PLAY = 1
-
-        /** The request code for pause action PendingIntent.  */
-        private const val REQUEST_PAUSE = 2
-
-        /** The request code for info action PendingIntent.  */
-        private const val REQUEST_INFO = 3
-
-        /** The intent extra value for play action.  */
-        private const val CONTROL_TYPE_PLAY = 1
-
-        /** The intent extra value for pause action.  */
-        private const val CONTROL_TYPE_PAUSE = 2
-    }
-
-    /** The arguments to be used for Picture-in-Picture mode.  */
-    private val pictureInPictureParamsBuilder = PictureInPictureParams.Builder()
-
-    /** This shows the video.  */
-    private lateinit var movieView: MovieView
-
-    /** The bottom half of the screen; hidden on landscape  */
-    private lateinit var scrollView: ScrollView
-
-    /** A [BroadcastReceiver] to receive action item events from Picture-in-Picture mode.  */
-    private val mReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent?) {
-            if (intent != null) {
-                if (intent.action != ACTION_MEDIA_CONTROL) {
-                    return
-                }
-
-                // This is where we are called back from Picture-in-Picture action items.
-                when (intent.getIntExtra(EXTRA_CONTROL_TYPE, 0)) {
-                    CONTROL_TYPE_PLAY -> movieView.play()
-                    CONTROL_TYPE_PAUSE -> movieView.pause()
-                }
+        // Called when an item is clicked.
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent == null || intent.action != ACTION_STOPWATCH_CONTROL) {
+                return
+            }
+            when (intent.getIntExtra(EXTRA_CONTROL_TYPE, 0)) {
+                CONTROL_TYPE_START_OR_PAUSE -> viewModel.startOrPause()
+                CONTROL_TYPE_CLEAR -> viewModel.clear()
             }
         }
-    }
-
-    private val labelPlay: String by lazy { getString(R.string.play) }
-    private val labelPause: String by lazy { getString(R.string.pause) }
-
-    /**
-     * Callbacks from the [MovieView] showing the video playback.
-     */
-    private val movieListener = object : MovieView.MovieListener() {
-
-        override fun onMovieStarted() {
-            // We are playing the video now. In PiP mode, we want to show an action item to pause
-            // the video.
-            updatePictureInPictureActions(
-                R.drawable.ic_pause_24dp,
-                labelPause,
-                CONTROL_TYPE_PAUSE, REQUEST_PAUSE
-            )
-        }
-
-        override fun onMovieStopped() {
-            // The video stopped or reached its end. In PiP mode, we want to show an action item
-            // to play the video.
-            updatePictureInPictureActions(
-                R.drawable.ic_play_arrow_24dp, labelPlay,
-                CONTROL_TYPE_PLAY, REQUEST_PLAY
-            )
-        }
-
-        override fun onMovieMinimized() {
-            // The MovieView wants us to minimize it. We enter Picture-in-Picture mode now.
-            minimize()
-        }
-
-    }
-
-    /**
-     * Update the state of pause/resume action item in Picture-in-Picture mode.
-
-     * @param iconId      The icon to be used.
-     * @param title       The title text.
-     * @param controlType The type of the action. either [.CONTROL_TYPE_PLAY] or
-     * [.CONTROL_TYPE_PAUSE].
-     * @param requestCode The request code for the [PendingIntent].
-     */
-    internal fun updatePictureInPictureActions(
-        @DrawableRes iconId: Int,
-        title: String,
-        controlType: Int,
-        requestCode: Int
-    ) {
-        val actions = ArrayList<RemoteAction>()
-
-        // This is the PendingIntent that is invoked when a user clicks on the action item.
-        // You need to use distinct request codes for play and pause, or the PendingIntent won't
-        // be properly updated.
-        val intent = PendingIntent.getBroadcast(
-            this,
-            requestCode,
-            Intent(ACTION_MEDIA_CONTROL).putExtra(EXTRA_CONTROL_TYPE, controlType),
-            0
-        )
-        val icon = Icon.createWithResource(this, iconId)
-        actions.add(RemoteAction(icon, title, title, intent))
-
-        // Another action item. This is a fixed action.
-        actions.add(
-            RemoteAction(
-                Icon.createWithResource(this, R.drawable.ic_info_24dp),
-                getString(R.string.info), getString(R.string.info_description),
-                PendingIntent.getActivity(
-                    this, REQUEST_INFO,
-                    Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.info_uri))),
-                    0
-                )
-            )
-        )
-
-        pictureInPictureParamsBuilder.setActions(actions)
-        // This is how you can update action items (or aspect ratio) for Picture-in-Picture mode.
-        // Note this call can happen even when the app is not in PiP mode. In that case, the
-        // arguments will be used for at the next call of #enterPictureInPictureMode.
-        setPictureInPictureParams(pictureInPictureParamsBuilder.build())
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        // View references
-        movieView = findViewById(R.id.movie)
-        scrollView = findViewById(R.id.scroll)
-
-        val switchExampleButton = findViewById<Button>(R.id.switch_example)
-        switchExampleButton.text = getString(R.string.switch_media_session)
-        switchExampleButton.setOnClickListener(SwitchActivityOnClick())
-
-        // Set up the video; it automatically starts.
-        movieView.setMovieListener(movieListener)
-        findViewById<Button>(R.id.pip).setOnClickListener { minimize() }
-    }
-
-    override fun onStop() {
-        // On entering Picture-in-Picture mode, onPause is called, but not onStop.
-        // For this reason, this is the place where we should pause the video playback.
-        movieView.pause()
-        super.onStop()
-    }
-
-    override fun onRestart() {
-        super.onRestart()
-        // Show the video controls so the video can be easily resumed.
-        if (!isInPictureInPictureMode) {
-            movieView.showControls()
+        binding = MainActivityBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        // Event handlers
+        binding.clear.setOnClickListener { viewModel.clear() }
+        binding.startOrPause.setOnClickListener { viewModel.startOrPause() }
+        binding.pip.setOnClickListener {
+            enterPictureInPictureMode(updatePictureInPictureParams(viewModel.started.value == true))
         }
-    }
-
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        adjustFullScreen(newConfig)
-    }
-
-    override fun onWindowFocusChanged(hasFocus: Boolean) {
-        super.onWindowFocusChanged(hasFocus)
-        if (hasFocus) {
-            adjustFullScreen(resources.configuration)
-        }
-    }
-
-    override fun onPictureInPictureModeChanged(
-        isInPictureInPictureMode: Boolean, newConfig: Configuration
-    ) {
-        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
-        if (isInPictureInPictureMode) {
-            // Starts receiving events from action items in PiP mode.
-            registerReceiver(mReceiver, IntentFilter(ACTION_MEDIA_CONTROL))
-        } else {
-            // We are out of PiP mode. We can stop receiving events from it.
-            unregisterReceiver(mReceiver)
-            // Show the video controls if the video is not playing
-            if (!movieView.isPlaying) {
-                movieView.showControls()
-            }
-        }
-    }
-
-    /**
-     * Enters Picture-in-Picture mode.
-     */
-    internal fun minimize() {
-        // Hide the controls in picture-in-picture mode.
-        movieView.hideControls()
-        // Calculate the aspect ratio of the PiP screen.
-        pictureInPictureParamsBuilder.setAspectRatio(Rational(movieView.width, movieView.height))
-        enterPictureInPictureMode(pictureInPictureParamsBuilder.build())
-    }
-
-    /**
-     * Adjusts immersive full-screen flags depending on the screen orientation.
-
-     * @param config The current [Configuration].
-     */
-    private fun adjustFullScreen(config: Configuration) {
-        val insetsController = ViewCompat.getWindowInsetsController(window.decorView)
-        insetsController?.systemBarsBehavior =
-            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-        if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            insetsController?.hide(WindowInsetsCompat.Type.systemBars())
-            scrollView.visibility = View.GONE
-            movieView.setAdjustViewBounds(false)
-        } else {
-            insetsController?.show(WindowInsetsCompat.Type.systemBars())
-            scrollView.visibility = View.VISIBLE
-            movieView.setAdjustViewBounds(true)
-        }
-    }
-
-    /**
-     * Launches [MediaSessionPlaybackActivity] and closes this activity.
-     */
-    private inner class SwitchActivityOnClick : View.OnClickListener {
-        override fun onClick(view: View) {
-            startActivity(Intent(view.context, MediaSessionPlaybackActivity::class.java))
+        binding.switchExample.setOnClickListener {
+            startActivity(Intent(this@MainActivity, MovieActivity::class.java))
             finish()
         }
+        // Observe data from the viewModel.
+        viewModel.time.observe(this) { time -> binding.time.text = time }
+        viewModel.started.observe(this) { started ->
+            binding.startOrPause.setImageResource(
+                if (started) R.drawable.ic_pause_24dp else R.drawable.ic_play_arrow_24dp
+            )
+            updatePictureInPictureParams(started)
+        }
+        // Handle events from the action icons on the picture-in-picture mode.
+        registerReceiver(broadcastReceiver, IntentFilter(ACTION_STOPWATCH_CONTROL))
+    }
+
+    // This is called when the activity gets into or out of the picture-in-picture mode.
+    override fun onPictureInPictureModeChanged(
+        isInPictureInPictureMode: Boolean,
+        newConfig: Configuration?
+    ) {
+        if (isInPictureInPictureMode) {
+            // Hide in-app buttons. They cannot be interacted in the picture-in-picture mode, and
+            // their features are provided as the action icons.
+            binding.clear.visibility = View.GONE
+            binding.startOrPause.visibility = View.GONE
+        } else {
+            binding.clear.visibility = View.VISIBLE
+            binding.startOrPause.visibility = View.VISIBLE
+        }
+    }
+
+    /**
+     * Updates the parameters of the picture-in-picture mode for this activity based on the current
+     * [started] state of the stopwatch.
+     */
+    private fun updatePictureInPictureParams(started: Boolean): PictureInPictureParams {
+        val visibleRect = Rect()
+        binding.stopwatchBackground.getGlobalVisibleRect(visibleRect)
+        val params = PictureInPictureParams.Builder()
+            // Set action items for the picture-in-picture mode. These are the only custom controls
+            // available during the picture-in-picture mode.
+            .setActions(
+                listOf(
+                    // "Clear" action.
+                    createRemoteAction(
+                        R.drawable.ic_refresh_24dp,
+                        R.string.clear,
+                        REQUEST_CLEAR,
+                        CONTROL_TYPE_CLEAR
+                    ),
+                    if (started) {
+                        // "Pause" action when the stopwatch is already started.
+                        createRemoteAction(
+                            R.drawable.ic_pause_24dp,
+                            R.string.pause,
+                            REQUEST_START_OR_PAUSE,
+                            CONTROL_TYPE_START_OR_PAUSE
+                        )
+                    } else {
+                        // "Start" action when the stopwatch is not started.
+                        createRemoteAction(
+                            R.drawable.ic_play_arrow_24dp,
+                            R.string.start,
+                            REQUEST_START_OR_PAUSE,
+                            CONTROL_TYPE_START_OR_PAUSE
+                        )
+                    }
+                )
+            )
+            // Set the aspect ratio of the picture-in-picture mode.
+            .setAspectRatio(Rational(16, 9))
+            // Specify the portion of the screen that turns into the picture-in-picture mode.
+            // This makes the transition animation smoother.
+            .setSourceRectHint(visibleRect)
+            // Turn the screen into the picture-in-picture mode if it's hidden by the "Home" button.
+            .setAutoEnterEnabled(true)
+            // Disables the seamless resize. The seamless resize works great for videos where the
+            // content can be arbitrarily scaled, but you can disable this for non-video content so
+            // that the picture-in-picture mode is resized with a cross fade animation.
+            .setSeamlessResizeEnabled(false)
+            .build()
+        setPictureInPictureParams(params)
+        return params
+    }
+
+    /**
+     * Creates a [RemoteAction]. It is used as an action icon on the overlay of the
+     * picture-in-picture mode.
+     */
+    private fun createRemoteAction(
+        @DrawableRes iconResId: Int,
+        @StringRes titleResId: Int,
+        requestCode: Int,
+        controlType: Int
+    ): RemoteAction {
+        return RemoteAction(
+            Icon.createWithResource(this, iconResId),
+            getString(titleResId),
+            getString(titleResId),
+            PendingIntent.getBroadcast(
+                this,
+                requestCode,
+                Intent(ACTION_STOPWATCH_CONTROL)
+                    .putExtra(EXTRA_CONTROL_TYPE, controlType),
+                PendingIntent.FLAG_IMMUTABLE
+            )
+        )
     }
 }

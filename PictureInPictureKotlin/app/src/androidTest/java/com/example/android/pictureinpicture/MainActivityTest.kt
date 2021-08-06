@@ -16,33 +16,19 @@
 
 package com.example.android.pictureinpicture
 
-import android.content.pm.ActivityInfo
-import android.view.View
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.test.core.app.launchActivity
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.UiController
-import androidx.test.espresso.ViewAction
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.isEnabled
 import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.ext.junit.rules.ActivityScenarioRule
+import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
-import androidx.test.platform.app.InstrumentationRegistry
-import com.example.android.pictureinpicture.widget.MovieView
-import org.hamcrest.Description
-import org.hamcrest.Matcher
-import org.hamcrest.Matchers.`is`
+import com.google.common.truth.Truth.assertThat
+import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.not
-import org.hamcrest.TypeSafeMatcher
-import org.hamcrest.core.AllOf.allOf
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertThat
-import org.junit.Assert.assertTrue
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -50,100 +36,24 @@ import org.junit.runner.RunWith
 @LargeTest
 class MainActivityTest {
 
-    @Rule
-    @JvmField
-    val rule = ActivityScenarioRule(MainActivity::class.java)
-
     @Test
-    fun movie_playingOnPip() {
-        // The movie should be playing on start
-        onView(withId(R.id.movie))
-            .check(matches(allOf(isDisplayed(), isPlaying())))
-            .perform(showControls())
-        // Click on the button to enter Picture-in-Picture mode
-        onView(withId(R.id.minimize)).perform(click())
-        InstrumentationRegistry.getInstrumentation().waitForIdleSync()
-        // The Activity is paused. We cannot use Espresso to test paused activities.
-        rule.scenario.onActivity { activity ->
-            // We are now in Picture-in-Picture mode
-            assertTrue(activity.isInPictureInPictureMode)
-            val view = activity.findViewById<MovieView>(R.id.movie)
-            assertNotNull(view)
-            // The video should still be playing
-            assertTrue(view.isPlaying)
+    fun start() {
+        launchActivity<MainActivity>().use {
+            onView(withId(R.id.time)).check(matches(withText("00:00:00")))
+            onView(withId(R.id.start_or_pause)).perform(click())
+            onView(withId(R.id.time)).check(matches(not(withText("00:00:00"))))
         }
     }
 
     @Test
-    fun movie_pauseAndResume() {
-        // The movie should be playing on start
-        onView(withId(R.id.movie))
-            .check(matches(allOf(isDisplayed(), isPlaying())))
-            .perform(showControls())
-        // Pause
-        onView(withId(R.id.toggle)).perform(click())
-        onView(withId(R.id.movie)).check(matches(not(isPlaying())))
-        // Resume
-        onView(withId(R.id.toggle)).perform(click())
-        onView(withId(R.id.movie)).check(matches(isPlaying()))
-    }
-
-    @Test
-    fun fullscreen_enabledOnLandscape() {
-        rule.scenario.onActivity { activity ->
-            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-        }
-        InstrumentationRegistry.getInstrumentation().waitForIdleSync()
-        rule.scenario.onActivity { activity ->
-            val insets = ViewCompat.getRootWindowInsets(activity.window.decorView)!!
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            assertThat(systemBars.left, `is`(0))
-            assertThat(systemBars.top, `is`(0))
-            assertThat(systemBars.right, `is`(0))
-            assertThat(systemBars.bottom, `is`(0))
-        }
-    }
-
-    @Test
-    fun fullscreen_disabledOnPortrait() {
-        rule.scenario.onActivity { activity ->
-            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        }
-        InstrumentationRegistry.getInstrumentation().waitForIdleSync()
-        rule.scenario.onActivity { activity ->
-            val insets = ViewCompat.getRootWindowInsets(activity.window.decorView)!!
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            assertThat(systemBars.top, `is`(not(0)))
-            assertThat(systemBars.bottom, `is`(not(0)))
-        }
-    }
-
-    private fun isPlaying(): Matcher<View> {
-        return object : TypeSafeMatcher<View>() {
-            override fun matchesSafely(view: View): Boolean {
-                return (view as MovieView).isPlaying
+    fun pip() {
+        launchActivity<MainActivity>().use { scenario ->
+            scenario.onActivity { activity ->
+                assertThat(activity.isInPictureInPictureMode).isFalse()
             }
-
-            override fun describeTo(description: Description) {
-                description.appendText("MovieView is playing")
-            }
-        }
-    }
-
-    private fun showControls(): ViewAction {
-        return object : ViewAction {
-            override fun getConstraints(): Matcher<View> {
-                return isAssignableFrom(MovieView::class.java)
-            }
-
-            override fun getDescription(): String {
-                return "Show controls of MovieView"
-            }
-
-            override fun perform(uiController: UiController, view: View) {
-                uiController.loopMainThreadUntilIdle()
-                (view as MovieView).showControls()
-                uiController.loopMainThreadUntilIdle()
+            onView(withId(R.id.pip)).perform(click())
+            scenario.onActivity { activity ->
+                assertThat(activity.isInPictureInPictureMode).isTrue()
             }
         }
     }
