@@ -35,7 +35,7 @@ import android.widget.ScrollView;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 
@@ -304,7 +304,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private void adjustFullScreen(Configuration config) {
         final WindowInsetsControllerCompat insetsController =
-                ViewCompat.getWindowInsetsController(getWindow().getDecorView());
+                WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
         if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             insetsController.hide(WindowInsetsCompat.Type.systemBars());
             mScrollView.setVisibility(View.GONE);
