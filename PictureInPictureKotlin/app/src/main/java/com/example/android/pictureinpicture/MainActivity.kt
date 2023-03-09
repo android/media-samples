@@ -24,16 +24,20 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Configuration
-import android.graphics.Rect
 import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.util.Rational
 import android.view.View
+import androidx.activity.trackPipAnimationHintView
 import androidx.activity.viewModels
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.android.pictureinpicture.databinding.MainActivityBinding
+import kotlinx.coroutines.launch
 
 /** Intent action for stopwatch controls from Picture-in-Picture mode.  */
 private const val ACTION_STOPWATCH_CONTROL = "stopwatch_control"
@@ -93,6 +97,15 @@ class MainActivity : AppCompatActivity() {
             )
             updatePictureInPictureParams(started)
         }
+
+        // Use trackPipAnimationHint view to make a smooth enter/exit pip transition.
+        // See https://android.devsite.corp.google.com/develop/ui/views/picture-in-picture#smoother-transition
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                trackPipAnimationHintView(binding.stopwatchBackground)
+            }
+        }
+
         // Handle events from the action icons on the picture-in-picture mode.
         registerReceiver(broadcastReceiver, IntentFilter(ACTION_STOPWATCH_CONTROL))
     }
@@ -100,8 +113,9 @@ class MainActivity : AppCompatActivity() {
     // This is called when the activity gets into or out of the picture-in-picture mode.
     override fun onPictureInPictureModeChanged(
         isInPictureInPictureMode: Boolean,
-        newConfig: Configuration?
+        newConfig: Configuration
     ) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
         if (isInPictureInPictureMode) {
             // Hide in-app buttons. They cannot be interacted in the picture-in-picture mode, and
             // their features are provided as the action icons.
@@ -118,8 +132,6 @@ class MainActivity : AppCompatActivity() {
      * [started] state of the stopwatch.
      */
     private fun updatePictureInPictureParams(started: Boolean): PictureInPictureParams {
-        val visibleRect = Rect()
-        binding.stopwatchBackground.getGlobalVisibleRect(visibleRect)
         val params = PictureInPictureParams.Builder()
             // Set action items for the picture-in-picture mode. These are the only custom controls
             // available during the picture-in-picture mode.
@@ -153,9 +165,6 @@ class MainActivity : AppCompatActivity() {
             )
             // Set the aspect ratio of the picture-in-picture mode.
             .setAspectRatio(Rational(16, 9))
-            // Specify the portion of the screen that turns into the picture-in-picture mode.
-            // This makes the transition animation smoother.
-            .setSourceRectHint(visibleRect)
             // Turn the screen into the picture-in-picture mode if it's hidden by the "Home" button.
             .setAutoEnterEnabled(true)
             // Disables the seamless resize. The seamless resize works great for videos where the
