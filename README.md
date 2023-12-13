@@ -1,4 +1,5 @@
-Android Media Samples Repository
+Androgh repo clone android/media-samples
+id Media Samples Repository
 ================================
 
 This repository contains a set of individual Android Studio projects to help you get
