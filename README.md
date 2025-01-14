@@ -1,3 +1,7 @@
+```
+gh repo clone android/media-samples
+```
+
 Android Media Samples Repository
 ================================
 
