@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.ai.samples.imagenediting.ui
+package com.android.ai.samples.imagenediting.sample.ui
 
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.android.ai.samples.imagenediting.data.ImagenEditingDataSource
+import com.android.ai.samples.imagenediting.sample.data.ImagenEditingDataSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,8 +54,23 @@ class ImagenEditingViewModel @Inject constructor(private val imagenDataSource: I
     }
 
     fun inpaintImage(sourceImage: Bitmap, maskImage: Bitmap, prompt: String, editSteps: Int = 50) {
-       // TODO #5 - Implement ViewModel Logic for inpainting
-    }
+        _uiState.value = ImagenEditingUIState.Loading
+        viewModelScope.launch {
+            try {
+                val inpaintedBitmap = imagenDataSource.inpaintImage(
+                    sourceImage = sourceImage,
+                    maskImage = maskImage,
+                    prompt = prompt,
+                    editSteps = editSteps,
+                )
+                _uiState.value = ImagenEditingUIState.ImageGenerated(
+                    bitmap = inpaintedBitmap,
+                    contentDescription = "Inpainted image based on prompt: $prompt",
+                )
+            } catch (e: Exception) {
+                _uiState.value = ImagenEditingUIState.Error(e.localizedMessage ?: "An unknown error occurred during inpainting")
+            }
+        }    }
 
     fun onImageMaskReady(originalBitmap: Bitmap, maskBitmap: Bitmap) {
         val originalContentDescription = (_uiState.value as? ImagenEditingUIState.ImageGenerated)?.contentDescription ?: "Edited image"

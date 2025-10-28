@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.ai.catalog.domain
+package com.android.ai.samples.imagenediting.domain
 
 import android.Manifest
 import androidx.annotation.DrawableRes
@@ -21,8 +21,8 @@ import androidx.annotation.RequiresPermission
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import com.android.ai.catalog.R
-import com.android.ai.samples.imagenediting.ui.ImagenEditingScreen
+import com.android.ai.samples.imagenediting.R
+import com.android.ai.samples.imagenediting.sample.ui.ImagenEditingScreen
 import com.android.ai.theme.extendedColorScheme
 
 @RequiresPermission(Manifest.permission.RECORD_AUDIO)

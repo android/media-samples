@@ -24,11 +24,11 @@ plugins {
 }
 
 android {
-    namespace = "com.android.ai.catalog"
+    namespace = "com.android.ai.samples.imagenediting"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.android.ai.catalog"
+        applicationId = "com.android.ai.samples.imagenediting"
         minSdk = 26
         targetSdk = 36
         versionCode = 1

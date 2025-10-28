@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.ai.catalog
+package com.android.ai.samples.imagenediting
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -21,7 +21,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
-import com.android.ai.catalog.ui.CatalogApp
+import com.android.ai.samples.imagenediting.ui.CatalogApp
 import com.android.ai.theme.AISampleCatalogTheme
 import dagger.hilt.android.AndroidEntryPoint
 

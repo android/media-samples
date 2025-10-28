@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.ai.samples.imagenediting.ui
+package com.android.ai.samples.imagenediting.sample.ui
 
 import android.graphics.Bitmap
 import android.graphics.Paint
@@ -58,7 +58,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.createBitmap
-import com.android.ai.samples.imagenediting.R
+import com.android.ai.samples.imagenediting.sample.R
 import kotlin.math.min
 
 @Composable
@@ -80,12 +80,27 @@ fun ImagenEditingMaskEditor(sourceBitmap: Bitmap, onMaskFinalized: (Bitmap) -> U
                     .fillMaxWidth()
                     .pointerInput(Unit) {
                         detectDragGestures(
-                            // TODO #4 - Implement Drag logic
                             onDragStart = { startOffset ->
+                                val transformedStart = Offset(
+                                    (startOffset.x - offsetX) / scale,
+                                    (startOffset.y - offsetY) / scale,
+                                )
+                                currentPath = Path().apply { moveTo(transformedStart.x, transformedStart.y) }
                             },
                             onDrag = { change, _ ->
+                                currentPath?.let {
+                                    val transformedChange = Offset(
+                                        (change.position.x - offsetX) / scale,
+                                        (change.position.y - offsetY) / scale,
+                                    )
+                                    it.lineTo(transformedChange.x, transformedChange.y)
+                                    currentPath = Path().apply { addPath(it) }
+                                }
+                                change.consume()
                             },
                             onDragEnd = {
+                                currentPath?.let { paths.add(it) }
+                                currentPath = null
                             },
                         )
                     },

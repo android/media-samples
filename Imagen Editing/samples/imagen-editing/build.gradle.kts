@@ -21,7 +21,7 @@ plugins {
 }
 
 android {
-    namespace = "com.android.ai.samples.imagenediting"
+    namespace = "com.android.ai.samples.imagenediting.sample"
     compileSdk = 36
 
     buildFeatures {
