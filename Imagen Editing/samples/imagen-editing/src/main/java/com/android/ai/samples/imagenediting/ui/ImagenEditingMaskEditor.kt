@@ -80,7 +80,7 @@ fun ImagenEditingMaskEditor(sourceBitmap: Bitmap, onMaskFinalized: (Bitmap) -> U
                     .fillMaxWidth()
                     .pointerInput(Unit) {
                         detectDragGestures(
-                            // TODO #2 - Implement Drag logic
+                            // TODO #4 - Implement Drag logic
                             onDragStart = { startOffset ->
                             },
                             onDrag = { change, _ ->
