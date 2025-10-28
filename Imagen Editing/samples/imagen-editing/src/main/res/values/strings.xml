@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      https://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~
+  -->
+
+<resources>
+    <string name="editing_generate_button">Generate</string>
+    <string name="editing_generating_label">Generating…</string>
+    <string name="editing_prompt_label">Prompt</string>
+    <string name="editing_mask_prompt_label">Mask edit prompt</string>
+    <string name="editing_edit_label">Mask Edit</string>
+    <string name="editing_inpaint_button">Inpaint</string>
+    <string name="editing_imagen_placeholder">Enter a prompt and tap \"Generate\" to generate an image</string>
+    <string name="editing_edit_image_button">Edit Image</string>
+    <string name="editing_finalize_mask_button">Finalize Mask</string>
+    <string name="editing_placeholder_prompt">Generate an image, then tap to draw a mask.</string>
+    <string name="editing_placeholder_prompt_entry">An image of dog working as a chef</string>
+    <string name="editing_error_message_unknown">An unknown error occurred.</string>
+    <string name="editing_title_image_generation_title">Imagen Editing</string>
+    <string name="editing_title_image_generation_subtitle">Generate images with Imagen, Google\'s image generation model.</string>
+    <string name="editing_image_to_mask">Image to be masked</string>
+    <string name="editing_generated_image">The generated image</string>
+    <string name="editing_generated_mask">The generated mask</string>
+    <string name="editing_edit_mask_button">Draw a mask</string>
+    <string name="cancel_masking">Cancel masking</string>
+    <string name="undo_the_mask">Undo the mask</string>
+    <string name="save_the_mask">Save the mask</string>
+    <string name="describe_the_image_to_generate">describe the image to generate</string>
+    <string name="generate_an_image_to_edit">Generate an image to edit</string>
+    <string name="describe_the_image_to_in_paint">describe the image to in-paint</string>
+</resources>
