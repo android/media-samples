@@ -80,27 +80,12 @@ fun ImagenEditingMaskEditor(sourceBitmap: Bitmap, onMaskFinalized: (Bitmap) -> U
                     .fillMaxWidth()
                     .pointerInput(Unit) {
                         detectDragGestures(
+                            // TODO #4 - Implement Drag logic
                             onDragStart = { startOffset ->
-                                val transformedStart = Offset(
-                                    (startOffset.x - offsetX) / scale,
-                                    (startOffset.y - offsetY) / scale,
-                                )
-                                currentPath = Path().apply { moveTo(transformedStart.x, transformedStart.y) }
                             },
                             onDrag = { change, _ ->
-                                currentPath?.let {
-                                    val transformedChange = Offset(
-                                        (change.position.x - offsetX) / scale,
-                                        (change.position.y - offsetY) / scale,
-                                    )
-                                    it.lineTo(transformedChange.x, transformedChange.y)
-                                    currentPath = Path().apply { addPath(it) }
-                                }
-                                change.consume()
                             },
                             onDragEnd = {
-                                currentPath?.let { paths.add(it) }
-                                currentPath = null
                             },
                         )
                     },

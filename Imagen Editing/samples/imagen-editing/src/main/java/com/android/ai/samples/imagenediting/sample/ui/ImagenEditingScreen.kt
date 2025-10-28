@@ -115,7 +115,7 @@ private fun ImagenEditingScreenContent(
     ) { innerPadding ->
         val context = LocalContext.current
         val imageBitmap = remember {
-            val bitmap = BitmapFactory.decodeResource(context.resources, com.android.ai.uicomponent.R.drawable.img_fill)
+            val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.img_fill)
             bitmap.asImageBitmap()
         }
         val imageShader = remember {
@@ -184,14 +184,14 @@ private fun ImagenEditingScreenContent(
                         if (showMaskEditor && bitmapForMasking != null) {
                             val textFieldState = rememberTextFieldState()
 
-                            ImagenEditingMaskEditor(
-                                sourceBitmap = bitmapForMasking,
-                                onMaskFinalized = { maskBitmap ->
-                                    onImageMaskReady(bitmapForMasking, maskBitmap)
-                                },
-                                onCancel = { onCancelMasking() },
-                                modifier = Modifier.fillMaxSize(),
-                            )
+                          ImagenEditingMaskEditor(
+                            sourceBitmap = bitmapForMasking,
+                            onMaskFinalized = { maskBitmap ->
+                              onImageMaskReady(bitmapForMasking, maskBitmap)
+                            },
+                            onCancel = { onCancelMasking() },
+                            modifier = Modifier.fillMaxSize(),
+                          )
 
                             Text(
                                 text = "Draw a mask on the image",
@@ -268,7 +268,7 @@ private fun BoxScope.TextField(
         primaryButton = {
             GenerateButton(
                 text = "",
-                icon = painterResource(id = com.android.ai.uicomponent.R.drawable.ic_ai_img),
+                icon = painterResource(id = R.drawable.ic_ai_img),
                 modifier = Modifier
                     .width(72.dp)
                     .height(55.dp)

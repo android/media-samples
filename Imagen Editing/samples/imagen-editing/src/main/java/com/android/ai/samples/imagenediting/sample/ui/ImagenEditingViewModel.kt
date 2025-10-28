@@ -29,7 +29,8 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class ImagenEditingViewModel @Inject constructor(private val imagenDataSource: ImagenEditingDataSource) : ViewModel() {
 
-    private val _uiState: MutableStateFlow<ImagenEditingUIState> = MutableStateFlow(ImagenEditingUIState.Initial)
+    private val _uiState: MutableStateFlow<ImagenEditingUIState> = MutableStateFlow(
+        ImagenEditingUIState.Initial)
     val uiState: StateFlow<ImagenEditingUIState> = _uiState
 
     private val _bitmapForMasking = MutableStateFlow<Bitmap?>(null)
@@ -54,23 +55,8 @@ class ImagenEditingViewModel @Inject constructor(private val imagenDataSource: I
     }
 
     fun inpaintImage(sourceImage: Bitmap, maskImage: Bitmap, prompt: String, editSteps: Int = 50) {
-        _uiState.value = ImagenEditingUIState.Loading
-        viewModelScope.launch {
-            try {
-                val inpaintedBitmap = imagenDataSource.inpaintImage(
-                    sourceImage = sourceImage,
-                    maskImage = maskImage,
-                    prompt = prompt,
-                    editSteps = editSteps,
-                )
-                _uiState.value = ImagenEditingUIState.ImageGenerated(
-                    bitmap = inpaintedBitmap,
-                    contentDescription = "Inpainted image based on prompt: $prompt",
-                )
-            } catch (e: Exception) {
-                _uiState.value = ImagenEditingUIState.Error(e.localizedMessage ?: "An unknown error occurred during inpainting")
-            }
-        }    }
+       // TODO #5 - Implement ViewModel Logic for inpainting
+    }
 
     fun onImageMaskReady(originalBitmap: Bitmap, maskBitmap: Bitmap) {
         val originalContentDescription = (_uiState.value as? ImagenEditingUIState.ImageGenerated)?.contentDescription ?: "Edited image"
