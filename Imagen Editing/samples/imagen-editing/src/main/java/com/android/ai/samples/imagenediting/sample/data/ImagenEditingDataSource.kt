@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.ai.samples.imagenediting.data
+package com.android.ai.samples.imagenediting.sample.data
 
 import android.graphics.Bitmap
 import com.google.firebase.Firebase
@@ -46,18 +46,33 @@ import javax.inject.Singleton
 @Singleton
 class ImagenEditingDataSource @Inject constructor() {
     private companion object {
-        // TODO #1 - Define constants for Imagen model names and default values.
-        const val IMAGEN_MODEL_NAME = ""
-        const val IMAGEN_EDITING_MODEL_NAME = ""
+        const val IMAGEN_MODEL_NAME = "imagen-4.0-ultra-generate-001"
+        const val IMAGEN_EDITING_MODEL_NAME = "imagen-3.0-capability-001"
         const val DEFAULT_EDIT_STEPS = 50
+        const val DEFAULT_STYLE_STRENGTH = 1
     }
 
-    // TODO #2 - Implement Firebase calls using Imagen models
-    // @OptIn(PublicPreviewAPI::class)
-    // private val imagenModel =
+    @OptIn(PublicPreviewAPI::class)
+    private val imagenModel =
+        Firebase.ai(backend = GenerativeBackend.vertexAI()).imagenModel(
+            IMAGEN_MODEL_NAME,
+            generationConfig = ImagenGenerationConfig(
+                numberOfImages = 1,
+                aspectRatio = ImagenAspectRatio.SQUARE_1x1,
+                imageFormat = ImagenImageFormat.jpeg(compressionQuality = 75),
+            ),
+        )
 
-    // @OptIn(PublicPreviewAPI::class)
-    // private val editingModel =
+    @OptIn(PublicPreviewAPI::class)
+    private val editingModel =
+        Firebase.ai(backend = GenerativeBackend.vertexAI()).imagenModel(
+            IMAGEN_EDITING_MODEL_NAME,
+            generationConfig = ImagenGenerationConfig(
+                numberOfImages = 1,
+                aspectRatio = ImagenAspectRatio.SQUARE_1x1,
+                imageFormat = ImagenImageFormat.jpeg(compressionQuality = 75),
+            ),
+        )
 
     /**
      * Generates an image based on the provided prompt.
@@ -93,8 +108,18 @@ class ImagenEditingDataSource @Inject constructor() {
      */
     @OptIn(PublicPreviewAPI::class)
     suspend fun inpaintImage(sourceImage: Bitmap, maskImage: Bitmap, prompt: String, editSteps: Int = DEFAULT_EDIT_STEPS): Bitmap {
-        // TODO #3 - Implement data source for inpainting;
-        return sourceImage;
+        val imageResponse = editingModel.editImage(
+            referenceImages = listOf(
+                ImagenRawImage(sourceImage.toImagenInlineImage()),
+                ImagenRawMask(maskImage.toImagenInlineImage()),
+            ),
+            prompt = prompt,
+            config = ImagenEditingConfig(
+                editMode = ImagenEditMode.INPAINT_INSERTION,
+                editSteps = editSteps,
+            ),
+        )
+        return imageResponse.images.first().asBitmap()
     }
 
     /**

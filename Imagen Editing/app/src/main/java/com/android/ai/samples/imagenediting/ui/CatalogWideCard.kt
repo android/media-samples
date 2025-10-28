@@ -13,16 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.ai.catalog.ui
+package com.android.ai.samples.imagenediting.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ElevatedCard
@@ -30,21 +28,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.android.ai.catalog.R
-import com.android.ai.catalog.domain.SampleCatalogItem
-import com.android.ai.catalog.domain.SampleTags
+import com.android.ai.samples.imagenediting.R
+import com.android.ai.samples.imagenediting.domain.SampleCatalogItem
+import com.android.ai.samples.imagenediting.domain.SampleTags
 import com.android.ai.theme.AISampleCatalogTheme
 import com.android.ai.uicomponent.Tag
 
 @Composable
-fun CatalogRowCard(catalogItem: SampleCatalogItem, onClick: () -> Unit) {
+fun CatalogWideCard(catalogItem: SampleCatalogItem, onClick: () -> Unit) {
     ElevatedCard(
         modifier = Modifier.padding(
             start = 16.dp,
@@ -52,53 +48,51 @@ fun CatalogRowCard(catalogItem: SampleCatalogItem, onClick: () -> Unit) {
             top = 16.dp,
         ).widthIn(max = 646.dp),
         onClick = onClick,
+        shape = RoundedCornerShape(
+            topStart = 0.dp,
+            topEnd = 0.dp,
+            bottomEnd = 12.dp,
+            bottomStart = 12.dp,
+        ),
     ) {
-        Row {
+        Column {
             Image(
                 painter = painterResource(id = catalogItem.keyArt ?: R.drawable.img_keyart_multimodal),
                 contentDescription = null,
                 modifier = Modifier
-                    .height(92.dp)
-                    .width(92.dp)
-                    .padding(top = 12.dp, start = 12.dp)
-                    .clip(RoundedCornerShape(4.dp)),
-                contentScale = ContentScale.Crop,
+                    .fillMaxWidth()
+                    .height(182.dp),
+                contentScale = ContentScale.FillWidth,
             )
-            Column {
-                Text(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 8.dp),
-                    style = MaterialTheme.typography.titleMedium,
-                    text = stringResource(catalogItem.title),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                FlowRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 16.dp, bottom = 4.dp),
-                ) {
-                    catalogItem.tags.forEach {
-                        Tag(text = it.label, color = it.backgroundColor)
-                    }
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp),
+                style = MaterialTheme.typography.headlineSmall,
+                text = stringResource(catalogItem.title),
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
+            ) {
+                catalogItem.tags.forEach {
+                    Tag(text = it.label, color = it.backgroundColor)
                 }
-                Text(
-                    modifier = Modifier
-                        .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
-                    style = MaterialTheme.typography.bodyMedium,
-                    text = stringResource(catalogItem.description),
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis,
-                )
             }
+            Text(
+                modifier = Modifier
+                    .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                style = MaterialTheme.typography.bodyMedium,
+                text = stringResource(catalogItem.description),
+            )
         }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun CatalogRowCardPreview() {
+fun CatalogWideCardPreview() {
     AISampleCatalogTheme {
         val sampleItem = SampleCatalogItem(
             title = R.string.gemini_multimodal_sample_title,
@@ -108,9 +102,9 @@ fun CatalogRowCardPreview() {
             tags = listOf(SampleTags.GEMINI_FLASH, SampleTags.FIREBASE),
         )
 
-        CatalogRowCard(
+        CatalogWideCard(
             catalogItem = sampleItem,
-            onClick = { /* No-op for the preview */ },
+            onClick = {},
         )
     }
 }

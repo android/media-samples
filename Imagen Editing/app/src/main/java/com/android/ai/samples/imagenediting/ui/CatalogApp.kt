@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.ai.catalog.ui
+package com.android.ai.samples.imagenediting.ui
 
 import android.content.Intent
 import android.util.Log
@@ -58,8 +58,8 @@ import androidx.core.net.toUri
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.android.ai.catalog.R
-import com.android.ai.catalog.domain.sampleCatalog
+import com.android.ai.samples.imagenediting.R
+import com.android.ai.samples.imagenediting.domain.sampleCatalog
 import com.google.firebase.FirebaseApp
 import kotlinx.serialization.Serializable
 
