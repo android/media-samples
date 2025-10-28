@@ -54,7 +54,7 @@ class ImagenEditingViewModel @Inject constructor(private val imagenDataSource: I
     }
 
     fun inpaintImage(sourceImage: Bitmap, maskImage: Bitmap, prompt: String, editSteps: Int = 50) {
-       // TODO #3 - Implement ViewModel Logic for inpainting
+       // TODO #5 - Implement ViewModel Logic for inpainting
     }
 
     fun onImageMaskReady(originalBitmap: Bitmap, maskBitmap: Bitmap) {

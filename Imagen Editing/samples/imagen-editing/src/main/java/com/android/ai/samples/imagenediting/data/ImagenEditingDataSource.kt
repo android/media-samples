@@ -46,33 +46,18 @@ import javax.inject.Singleton
 @Singleton
 class ImagenEditingDataSource @Inject constructor() {
     private companion object {
-        const val IMAGEN_MODEL_NAME = "imagen-4.0-ultra-generate-001"
-        const val IMAGEN_EDITING_MODEL_NAME = "imagen-3.0-capability-001"
+        // TODO #1 - Define constants for Imagen model names and default values.
+        const val IMAGEN_MODEL_NAME = ""
+        const val IMAGEN_EDITING_MODEL_NAME = ""
         const val DEFAULT_EDIT_STEPS = 50
-        const val DEFAULT_STYLE_STRENGTH = 1
     }
 
-    @OptIn(PublicPreviewAPI::class)
-    private val imagenModel =
-        Firebase.ai(backend = GenerativeBackend.vertexAI()).imagenModel(
-            IMAGEN_MODEL_NAME,
-            generationConfig = ImagenGenerationConfig(
-                numberOfImages = 1,
-                aspectRatio = ImagenAspectRatio.SQUARE_1x1,
-                imageFormat = ImagenImageFormat.jpeg(compressionQuality = 75),
-            ),
-        )
+    // TODO #2 - Implement Firebase calls using Imagen models
+    // @OptIn(PublicPreviewAPI::class)
+    // private val imagenModel =
 
-    @OptIn(PublicPreviewAPI::class)
-    private val editingModel =
-        Firebase.ai(backend = GenerativeBackend.vertexAI()).imagenModel(
-            IMAGEN_EDITING_MODEL_NAME,
-            generationConfig = ImagenGenerationConfig(
-                numberOfImages = 1,
-                aspectRatio = ImagenAspectRatio.SQUARE_1x1,
-                imageFormat = ImagenImageFormat.jpeg(compressionQuality = 75),
-            ),
-        )
+    // @OptIn(PublicPreviewAPI::class)
+    // private val editingModel =
 
     /**
      * Generates an image based on the provided prompt.
@@ -108,7 +93,7 @@ class ImagenEditingDataSource @Inject constructor() {
      */
     @OptIn(PublicPreviewAPI::class)
     suspend fun inpaintImage(sourceImage: Bitmap, maskImage: Bitmap, prompt: String, editSteps: Int = DEFAULT_EDIT_STEPS): Bitmap {
-        // TODO #1 - Implement data source for inpainting;
+        // TODO #3 - Implement data source for inpainting;
         return sourceImage;
     }
 
