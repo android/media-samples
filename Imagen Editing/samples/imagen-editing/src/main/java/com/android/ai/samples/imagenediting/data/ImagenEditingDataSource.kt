@@ -109,7 +109,7 @@ class ImagenEditingDataSource @Inject constructor() {
      */
     @OptIn(PublicPreviewAPI::class)
     suspend fun outpaintImage(sourceImage: Bitmap, targetDimensions: Dimensions, prompt: String): Bitmap {
-        // TODO #Bonus - Implement data source for inpainting;
+        // TODO #Bonus - Implement data source for outpainting;
         return sourceImage;
     }
 }
