@@ -247,9 +247,9 @@ fun VideoPickerDropdown(
 
 // Sample data for the picker
 private val sampleVideosForPicker = listOf(
-    VideoPickerData("Big Buck Bunny", "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4".toUri()),
-    VideoPickerData("Tears of Steel", "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4".toUri()),
-    VideoPickerData("For Bigger Blazes", "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4".toUri()),
+    VideoPickerData("Big Buck Bunny", "https://storage.googleapis.com/androiddevelopers/samples_assets/gtv-videos-bucket/sample/BigBuckBunny.mp4".toUri()),
+    VideoPickerData("Tears of Steel", "https://storage.googleapis.com/androiddevelopers/samples_assets/gtv-videos-bucket/sample/TearsOfSteel.mp4".toUri()),
+    VideoPickerData("For Bigger Blazes", "https://storage.googleapis.com/androiddevelopers/samples_assets/gtv-videos-bucket/sample/ForBiggerBlazes.mp4".toUri()),
 )
 
 @Preview
