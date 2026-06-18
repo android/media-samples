@@ -1,0 +1,12 @@
+<resources>
+  <string name="app_name">Gemini Video Editing</string>
+  <string name="video_selected">Video Selected</string>
+  <string name="no_media_selected">No Media Selected</string>
+  <string name="choose_videos">Choose videos from your device to begin the AI editing process.</string>
+  <string name="videos_selected">%1$d video(s) selected</string>
+  <string name="select_videos">Select Videos</string>
+  <string name="describe_intent">Describe your intent / e.g. create a 15-second highlight reel</string>
+  <string name="edit_with_gemini">Edit with Gemini</string>
+  <string name="gemini_processing">Gemini is processing your video...</string>
+  <string name="applying_edits">Applying AI edits ... </string>
+</resources>
