@@ -1,7 +1,9 @@
 # Gemini Video Editing App
+
+---
 An Android application demonstrating automated video highlight generation and intelligent cinematic editing suggestion using Vertex AI for Firebase (Gemini 2.5 Pro) and Firebase Cloud Storage.
 Users can select multiple videos, specify editing goals in natural language (e.g., "create a fast-paced 15-second action reel"), upload them to Cloud Storage, and let Gemini analyze the content to recommend and preview video trims and edits.
----
+
 ## Prerequisites & Project Setup
 This project uses **Firebase Cloud Storage** to host video files and **Vertex AI for Firebase** (Gemini 2.5 Pro) for advanced media analysis and editing recommendations. Follow the setup steps below to configure your Firebase and Google Cloud project.
 ### 1. Firebase Project Configuration
