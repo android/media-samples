@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright 2026 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     https://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<!-- Adaptive icon foreground: one photo split by the app's before/after divider. Left of it the
+     "before" is low-res (posterized sky, pixel-stepped sun and mountains, washed-out colors); right
+     of it the "after" is smooth and vivid. The sparkles stand for the on-device AI. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Shadow under the photo. -->
+    <path
+        android:fillAlpha="0.35"
+        android:fillColor="#1A1060"
+        android:pathData="M34,33H74A9,9 0,0 1,83 42V70A9,9 0,0 1,74 79H34A9,9 0,0 1,25 70V42A9,9 0,0 1,34 33Z" />
+
+    <!-- The photo card (25..83 x 31..77, corner radius 9). Shapes that reach a corner are already
+         trimmed to the rounded outline instead of using a <clip-path> group, because VectorDrawable
+         only anti-aliases clip paths from Android 13; on Android 9-12 the corners would be jagged. -->
+
+    <!-- After: smooth sky gradient and smooth, saturated mountains. -->
+    <path android:pathData="M54,31H74A9,9 0,0 1,83 40V68A9,9 0,0 1,74 77H54Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="0"
+                android:startY="31"
+                android:endX="0"
+                android:endY="77">
+                <item android:offset="0" android:color="#FFFF9EC0" />
+                <item android:offset="0.55" android:color="#FFFFC9A6" />
+                <item android:offset="1" android:color="#FFFFEBC9" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <path android:pathData="M54,62Q60,59 64,54Q67,50 69,50Q71,50 74,54Q78,59 83,61V68A9,9 0,0 1,74 77H54Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="0"
+                android:startY="50"
+                android:endX="0"
+                android:endY="77">
+                <item android:offset="0" android:color="#FF6252F0" />
+                <item android:offset="1" android:color="#FF3A2DAE" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <path
+        android:fillColor="#251B7A"
+        android:pathData="M54,69Q62,65 70,66Q76.882,66.983 82.797,69.899A9,9 0,0 1,74 77H54Z" />
+
+    <!-- Before: three flat sky bands, a pixel sun and stair-stepped mountains. The middle band is
+         drawn last over slightly taller outer bands so no background seam shows between them. -->
+    <path
+        android:fillColor="#E7B9C9"
+        android:pathData="M54,31H34A9,9 0,0 0,25 40V47.5H54Z" />
+    <path
+        android:fillColor="#EFE0CB"
+        android:pathData="M25,61.5V68A9,9 0,0 0,34 77H54V61.5Z" />
+    <path
+        android:fillColor="#EBCDBD"
+        android:pathData="M25,47h29v15h-29z" />
+    <path
+        android:fillColor="#FAF0DC"
+        android:pathData="M35,36.5H41V38.5H43V44.5H41V46.5H35V44.5H33V38.5H35Z" />
+    <path
+        android:fillColor="#958DC4"
+        android:pathData="M25,66H29V60H33V55H37V51H41V55H45V58H49V62H54V77H34A9,9 0,0 1,25 68Z" />
+    <path
+        android:fillColor="#6F6899"
+        android:pathData="M25.515,71H33V69H41V68H49V69H54V77H34A9,9 0,0 1,25.515 71Z" />
+
+    <!-- The before/after divider and its handle, as in the app. -->
+    <path
+        android:fillAlpha="0.35"
+        android:fillColor="#1A1060"
+        android:pathData="M51.75,25.25a2.25,2.25 0,0 1,4.5 0v57.5a2.25,2.25 0,0 1,-4.5 0z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M52.6,25.4a1.4,1.4 0,0 1,2.8 0v57.2a1.4,1.4 0,0 1,-2.8 0z" />
+    <path
+        android:fillAlpha="0.3"
+        android:fillColor="#1A1060"
+        android:pathData="M54,45.8a8.2,8.2 0,1 1,0 16.4a8.2,8.2 0,1 1,0 -16.4z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,46.8a7.2,7.2 0,1 1,0 14.4a7.2,7.2 0,1 1,0 -14.4z" />
+    <path
+        android:fillColor="#3A2DAE"
+        android:pathData="M49.9,54L52.6,51.6V56.4Z" />
+    <path
+        android:fillColor="#3A2DAE"
+        android:pathData="M58.1,54L55.4,51.6V56.4Z" />
+
+    <!-- AI sparkles. -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M76,26Q76,33 83,33Q76,33 76,40Q76,33 69,33Q76,33 76,26Z" />
+    <path
+        android:fillAlpha="0.9"
+        android:fillColor="#FFFFFF"
+        android:pathData="M66.5,22.8Q66.5,25.5 69.2,25.5Q66.5,25.5 66.5,28.2Q66.5,25.5 63.8,25.5Q66.5,25.5 66.5,22.8Z" />
+</vector>

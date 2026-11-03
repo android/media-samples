@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright 2026 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     https://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<!-- Themed icon (Android 13+): a one-color silhouette of the foreground. The photo frame is left
+     open where the sparkle breaks through it, and the mountains stop short of the divider so the
+     split still reads in a single color. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M66.5,32.5H34A7.5,7.5 0,0 0,26.5 40V68A7.5,7.5 0,0 0,34 75.5H74A7.5,7.5 0,0 0,81.5 68V42.5"
+        android:strokeWidth="3"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M35,36.5H41V38.5H43V44.5H41V46.5H35V44.5H33V38.5H35Z" />
+    <!-- Mountains end on the frame stroke's centerline (incl. its rounded corners) so they merge
+         into the frame instead of poking out past it. -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M26.5,66H31V60H34V55H37V51H41V55H45V58H49V62H51.5V75.5H34A7.5,7.5 0,0 1,26.5 68Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M56.5,60.8Q60.8,58.6 64,54Q67,50 69,50Q71,50 74,54Q77.391,58.238 81.5,60.321V68A7.5,7.5 0,0 1,74 75.5H56.5Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M53,25a1,1 0,0 1,2 0v58a1,1 0,0 1,-2 0z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M54,48.5a5.5,5.5 0,1 1,0 11a5.5,5.5 0,1 1,0 -11z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M76,26Q76,33 83,33Q76,33 76,40Q76,33 69,33Q76,33 76,26Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M66.5,22.8Q66.5,25.5 69.2,25.5Q66.5,25.5 66.5,28.2Q66.5,25.5 63.8,25.5Q66.5,25.5 66.5,22.8Z" />
+</vector>
